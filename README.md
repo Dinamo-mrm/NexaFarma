@@ -4,7 +4,7 @@
 > Proyecto formativo - SENA (Servicio Nacional de Aprendizaje)
 
 ## 📖 Descripción del Proyecto
-**FarmaSoft Plus** es una aplicación web integral desarrollada para optimizar y asegurar las operaciones de una farmacia. El sistema permite administrar clientes, empleados, proveedores, inventario, compras, ventas y fórmulas médicas. Destaca por su control riguroso de aspectos propios del sector farmacéutico, como la gestión de lotes, fechas de vencimiento, registros sanitarios (INVIMA) y el manejo de medicamentos controlados frente a los de venta libre.
+**Nexafarma** es una aplicación web integral desarrollada para optimizar y asegurar las operaciones de una farmacia. El sistema permite administrar clientes, empleados, proveedores, inventario, compras, ventas y fórmulas médicas. Destaca por su control riguroso de aspectos propios del sector farmacéutico, como la gestión de lotes, fechas de vencimiento, registros sanitarios (INVIMA) y el manejo de medicamentos controlados frente a los de venta libre.
 
 ## 🚀 Módulos y Características Principales
 
@@ -44,6 +44,7 @@ El ciclo de vida del software se rige por la metodología ágil **Scrum**, distr
 
 ## 👨‍💻 Créditos
 * **Desarrolladores:**
+
   Carlos Eduardo Barahona Yusti | Daniela Cardenas Gomez | Matiw Garcia
 * **Instructor:** Mg(c). Juan Pablo Pinillos Reina
 * **Institución:** SENA - Servicio Nacional de Aprendizaje
