@@ -44,6 +44,6 @@ El ciclo de vida del software se rige por la metodología ágil **Scrum**, distr
 
 ## 👨‍💻 Créditos
 * **Desarrolladores:**
-* Carlos Eduardo Barahona Yusti | Daniela Cardenas Gomez | Matiw Garcia
+  Carlos Eduardo Barahona Yusti | Daniela Cardenas Gomez | Matiw Garcia
 * **Instructor:** Mg(c). Juan Pablo Pinillos Reina
 * **Institución:** SENA - Servicio Nacional de Aprendizaje
