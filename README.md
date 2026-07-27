@@ -48,5 +48,8 @@ El ciclo de vida del software se rige por la metodología ágil **Scrum**, distr
 * **Instructor:** Mg(c). Juan Pablo Pinillos Reina
 * **Institución:** SENA - Servicio Nacional de Aprendizaje
 
-* <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/4b13ff1a-d57a-4b58-aaa0-5d176c375aa1" />
+
+* Propuestas de logo
+
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/4b13ff1a-d57a-4b58-aaa0-5d176c375aa1" />
 
