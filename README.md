@@ -53,4 +53,5 @@ El ciclo de vida del software se rige por la metodología ágil **Scrum**, distr
 * Propuestas de logo
 
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/4b13ff1a-d57a-4b58-aaa0-5d176c375aa1" />
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/b0a36897-8cba-4037-8721-b89f4cd43d81" />
 
