@@ -1,0 +1,11 @@
+package com.nexafarma.entity;
+
+public enum MotivoDevolucion {
+    PRODUCTO_DEFECTUOSO,
+    ERROR_EN_LA_ENTREGA,
+    PRODUCTO_PROXIMO_A_VENCER,
+    PRODUCTO_VENCIDO,
+    RETIRO_DEL_MERCADO,
+    DANO_EN_EL_EMPAQUE,
+    ERROR_DEL_PROVEEDOR
+}
