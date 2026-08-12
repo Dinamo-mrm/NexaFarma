@@ -55,3 +55,5 @@ El ciclo de vida del software se rige por la metodología ágil **Scrum**, distr
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/4b13ff1a-d57a-4b58-aaa0-5d176c375aa1" />
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/b0a36897-8cba-4037-8721-b89f4cd43d81" />
 
+https://lucid.app/lucidchart/b8e04471-8061-4f62-9d9f-28a5a3252605/edit?viewport_loc=-662%2C323%2C2742%2C1630%2Cpage1&invitationId=inv_aeb952fd-0fd0-4ebe-a159-4f04178bb940
+
