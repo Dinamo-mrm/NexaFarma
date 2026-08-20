@@ -14,6 +14,8 @@ import java.util.Optional;
 @Repository
 public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> {
 
+    // --- Métodos ya existentes en el repositorio original: se conservan sin cambios ---
+
     Optional<Medicamento> findByCodigoBarras(String codigoBarras);
 
     Optional<Medicamento> findByCodigoInterno(String codigoInterno);
@@ -36,4 +38,12 @@ public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> 
             WHERE i.cantidadDisponible <= i.stockMinimo AND m.activo = true
             """)
     List<Medicamento> findConStockBajo();
+
+    // --- Métodos nuevos, necesarios para el CRUD y validación de duplicados ---
+
+    /** Simétrico a existsByCodigoBarras: codigoInterno también es unique en Producto. */
+    boolean existsByCodigoInterno(String codigoInterno);
+
+    /** Listado paginado general de medicamentos activos, sin filtro de nombre. */
+    Page<Medicamento> findByActivoTrue(Pageable pageable);
 }
