@@ -1,0 +1,120 @@
+{
+  "info": {
+    "name": "NexaFarma API",
+    "description": "Colección base para probar los endpoints REST de NexaFarma. Usa la variable {{baseUrl}} (por defecto http://localhost:8080).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "categoriaId", "value": "1" },
+    { "key": "proveedorId", "value": "1" },
+    { "key": "medicamentoId", "value": "1" },
+    { "key": "loteId", "value": "1" },
+    { "key": "empleadoId", "value": "1" },
+    { "key": "usuarioId", "value": "1" },
+    { "key": "clienteId", "value": "1" },
+    { "key": "ventaId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Categorías",
+      "item": [
+        { "name": "Crear categoría", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/categorias", "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Analgésicos\",\n  \"descripcion\": \"Medicamentos para el dolor\"\n}" } } },
+        { "name": "Listar categorías", "request": { "method": "GET", "url": "{{baseUrl}}/api/categorias" } },
+        { "name": "Obtener categoría por id", "request": { "method": "GET", "url": "{{baseUrl}}/api/categorias/{{categoriaId}}" } },
+        { "name": "Actualizar categoría", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/categorias/{{categoriaId}}", "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Analgésicos y antipiréticos\",\n  \"descripcion\": \"Actualizado\"\n}" } } },
+        { "name": "Eliminar categoría", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/categorias/{{categoriaId}}" } }
+      ]
+    },
+    {
+      "name": "Proveedores",
+      "item": [
+        { "name": "Crear proveedor", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/proveedores", "body": { "mode": "raw", "raw": "{\n  \"nit\": \"900123456-7\",\n  \"razonSocial\": \"Distribuidora Farmacéutica SAS\",\n  \"nombreContacto\": \"Ana Gómez\",\n  \"telefono\": \"3001234567\",\n  \"correo\": \"contacto@distrifarma.com\",\n  \"direccion\": \"Cra 10 # 20-30, Cali\"\n}" } } },
+        { "name": "Listar proveedores", "request": { "method": "GET", "url": "{{baseUrl}}/api/proveedores?page=0&size=10" } },
+        { "name": "Buscar proveedor por razón social", "request": { "method": "GET", "url": "{{baseUrl}}/api/proveedores/buscar?razonSocial=Distri&page=0&size=10" } },
+        { "name": "Obtener proveedor por id", "request": { "method": "GET", "url": "{{baseUrl}}/api/proveedores/{{proveedorId}}" } }
+      ]
+    },
+    {
+      "name": "Medicamentos",
+      "item": [
+        { "name": "Crear medicamento", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/medicamentos", "body": { "mode": "raw", "raw": "{\n  \"codigoInterno\": \"MED-001\",\n  \"codigoBarras\": \"7701234567890\",\n  \"nombreComercial\": \"Acetaminofén 500mg\",\n  \"nombreGenerico\": \"Acetaminofén\",\n  \"categoria\": { \"id\": 1 },\n  \"proveedor\": { \"id\": 1 },\n  \"registroInvima\": \"INVIMA-2024-001\",\n  \"precioCompra\": 800,\n  \"precioVenta\": 1500,\n  \"stockMinimo\": 20,\n  \"ventaLibre\": true,\n  \"requiereFormula\": false\n}" } } },
+        { "name": "Listar medicamentos activos", "request": { "method": "GET", "url": "{{baseUrl}}/api/medicamentos?page=0&size=10" } },
+        { "name": "Buscar medicamento por nombre", "request": { "method": "GET", "url": "{{baseUrl}}/api/medicamentos/buscar?nombre=aceta&page=0&size=10" } },
+        { "name": "Obtener medicamento por id", "request": { "method": "GET", "url": "{{baseUrl}}/api/medicamentos/{{medicamentoId}}" } }
+      ]
+    },
+    {
+      "name": "Lotes",
+      "item": [
+        { "name": "Crear lote", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/lotes", "body": { "mode": "raw", "raw": "{\n  \"medicamento\": { \"id\": 1 },\n  \"numeroLote\": \"L-2026-001\",\n  \"fechaFabricacion\": \"2026-01-01\",\n  \"fechaVencimiento\": \"2027-06-01\",\n  \"cantidadDisponible\": 100\n}" } } },
+        { "name": "Listar lotes por medicamento (FEFO)", "request": { "method": "GET", "url": "{{baseUrl}}/api/lotes/medicamento/{{medicamentoId}}/fefo" } },
+        { "name": "Listar lotes próximos a vencer", "request": { "method": "GET", "url": "{{baseUrl}}/api/lotes/proximos-a-vencer?dias=30" } },
+        { "name": "Listar lotes vencidos", "request": { "method": "GET", "url": "{{baseUrl}}/api/lotes/vencidos" } }
+      ]
+    },
+    {
+      "name": "Inventario",
+      "item": [
+        { "name": "Obtener inventario por medicamento", "request": { "method": "GET", "url": "{{baseUrl}}/api/inventario/medicamento/{{medicamentoId}}" } },
+        { "name": "Listar stock bajo", "request": { "method": "GET", "url": "{{baseUrl}}/api/inventario/stock-bajo" } },
+        { "name": "Listar agotados", "request": { "method": "GET", "url": "{{baseUrl}}/api/inventario/agotados" } }
+      ]
+    },
+    {
+      "name": "Movimientos de Inventario",
+      "item": [
+        { "name": "Registrar entrada (recepción de compra)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/movimientos-inventario/entrada", "body": { "mode": "raw", "raw": "{\n  \"loteId\": 1,\n  \"cantidad\": 50,\n  \"empleadoResponsableId\": 1,\n  \"motivo\": \"Recepción de compra\"\n}" } } },
+        { "name": "Registrar salida (ajuste manual)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/movimientos-inventario/salida", "body": { "mode": "raw", "raw": "{\n  \"loteId\": 1,\n  \"cantidad\": 5,\n  \"empleadoResponsableId\": 1,\n  \"motivo\": \"Ajuste por conteo físico\"\n}" } } },
+        { "name": "Listar movimientos por medicamento", "request": { "method": "GET", "url": "{{baseUrl}}/api/movimientos-inventario/medicamento/{{medicamentoId}}?page=0&size=10" } }
+      ]
+    },
+    {
+      "name": "Alertas",
+      "item": [
+        { "name": "Alertas de stock bajo", "request": { "method": "GET", "url": "{{baseUrl}}/api/alertas/stock-bajo" } },
+        { "name": "Alertas de próximos a vencer", "request": { "method": "GET", "url": "{{baseUrl}}/api/alertas/proximos-a-vencer?dias=30" } }
+      ]
+    },
+    {
+      "name": "Empleados",
+      "item": [
+        { "name": "Crear empleado", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/empleados", "body": { "mode": "raw", "raw": "{\n  \"documento\": \"1002003000\",\n  \"nombreCompleto\": \"María Fernanda López\",\n  \"correo\": \"maria.lopez@nexafarma.com\",\n  \"telefono\": \"3009998888\",\n  \"cargo\": \"Farmacéutico\",\n  \"salario\": 2500000,\n  \"fechaIngreso\": \"2026-01-15\"\n}" } } },
+        { "name": "Listar empleados", "request": { "method": "GET", "url": "{{baseUrl}}/api/empleados?page=0&size=10" } },
+        { "name": "Obtener empleado por id", "request": { "method": "GET", "url": "{{baseUrl}}/api/empleados/{{empleadoId}}" } }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        { "name": "Crear usuario (credenciales)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/usuarios", "body": { "mode": "raw", "raw": "{\n  \"empleadoId\": 1,\n  \"username\": \"mlopez\",\n  \"password\": \"Farmacia2026!\",\n  \"rol\": \"FARMACEUTICO\"\n}" } } },
+        { "name": "Obtener usuario por id", "request": { "method": "GET", "url": "{{baseUrl}}/api/usuarios/{{usuarioId}}" } },
+        { "name": "Cambiar contraseña", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/usuarios/{{usuarioId}}/password", "body": { "mode": "raw", "raw": "{\n  \"passwordActual\": \"Farmacia2026!\",\n  \"passwordNueva\": \"NuevaClave2026!\"\n}" } } }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        { "name": "Crear cliente", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/clientes", "body": { "mode": "raw", "raw": "{\n  \"documento\": \"1098765432\",\n  \"nombreCompleto\": \"Carlos Ramírez\",\n  \"telefono\": \"3111234567\",\n  \"correo\": \"carlos.ramirez@mail.com\",\n  \"direccion\": \"Calle 5 # 10-20\",\n  \"fechaNacimiento\": \"1990-05-12\",\n  \"eps\": \"Sura\"\n}" } } },
+        { "name": "Listar clientes", "request": { "method": "GET", "url": "{{baseUrl}}/api/clientes?page=0&size=10" } },
+        { "name": "Obtener cliente por id", "request": { "method": "GET", "url": "{{baseUrl}}/api/clientes/{{clienteId}}" } }
+      ]
+    },
+    {
+      "name": "Ventas",
+      "item": [
+        { "name": "Registrar venta", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/ventas", "body": { "mode": "raw", "raw": "{\n  \"cliente\": { \"id\": 1 },\n  \"empleado\": { \"id\": 1 },\n  \"metodoPago\": \"EFECTIVO\",\n  \"detalles\": [\n    { \"medicamento\": { \"id\": 1 }, \"cantidad\": 2 }\n  ]\n}" } } },
+        { "name": "Obtener venta por id", "request": { "method": "GET", "url": "{{baseUrl}}/api/ventas/{{ventaId}}" } },
+        { "name": "Listar ventas", "request": { "method": "GET", "url": "{{baseUrl}}/api/ventas?page=0&size=10" } },
+        { "name": "Anular venta", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/ventas/{{ventaId}}/anular" } }
+      ]
+    },
+    {
+      "name": "Fórmulas Médicas",
+      "item": [
+        { "name": "Crear fórmula médica", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/api/formulas-medicas", "body": { "mode": "raw", "raw": "{\n  \"cliente\": { \"id\": 1 },\n  \"nombreMedico\": \"Dr. Juan Pérez\",\n  \"numeroTarjetaProfesional\": \"TP-12345\",\n  \"entidadSalud\": \"Sura EPS\",\n  \"fechaExpedicion\": \"2026-08-01\",\n  \"duracionTratamientoDias\": 30,\n  \"detalles\": [\n    { \"medicamento\": { \"id\": 1 }, \"dosis\": \"1 tableta\", \"frecuencia\": \"cada 8 horas\" }\n  ]\n}" } } },
+        { "name": "Listar fórmulas por cliente", "request": { "method": "GET", "url": "{{baseUrl}}/api/formulas-medicas/cliente/{{clienteId}}" } }
+      ]
+    }
+  ]
+}

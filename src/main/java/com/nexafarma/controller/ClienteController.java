@@ -1,55 +1,55 @@
 package com.nexafarma.controller;
 
-import com.nexafarma.dto.ClienteRequest;
-import com.nexafarma.dto.ClienteResponse;
+import com.nexafarma.entity.Cliente;
 import com.nexafarma.service.ClienteService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * API REST de Clientes. Responsabilidad del Desarrollador 3.
- * TODO(Dev1): asegurar estos endpoints con @PreAuthorize una vez esté
- * definida la matriz de roles (ADMINISTRADOR, FARMACEUTICO, VENDEDOR, AUXILIAR).
- */
 @RestController
 @RequestMapping("/api/clientes")
-@RequiredArgsConstructor
 public class ClienteController {
 
     private final ClienteService clienteService;
 
-    @PostMapping
-    public ResponseEntity<ClienteResponse> crear(@Valid @RequestBody ClienteRequest request) {
-        ClienteResponse creado = clienteService.crear(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+    public ClienteController(ClienteService clienteService) {
+        this.clienteService = clienteService;
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ClienteResponse> actualizar(@PathVariable Long id,
-                                                        @Valid @RequestBody ClienteRequest request) {
-        return ResponseEntity.ok(clienteService.actualizar(id, request));
+    @PostMapping
+    public ResponseEntity<Cliente> crear(@Valid @RequestBody Cliente cliente) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.crear(cliente));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClienteResponse> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<Cliente> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(clienteService.obtenerPorId(id));
     }
 
+    @GetMapping("/documento/{documento}")
+    public ResponseEntity<Cliente> obtenerPorDocumento(@PathVariable String documento) {
+        return ResponseEntity.ok(clienteService.obtenerPorDocumento(documento));
+    }
+
     @GetMapping
-    public ResponseEntity<Page<ClienteResponse>> listar(
-            @RequestParam(required = false) String nombre,
-            Pageable pageable) {
-        return ResponseEntity.ok(clienteService.listar(nombre, pageable));
+    public ResponseEntity<Page<Cliente>> listar(@RequestParam(required = false) String nombre, Pageable pageable) {
+        Page<Cliente> resultado = (nombre == null || nombre.isBlank())
+                ? clienteService.listar(pageable)
+                : clienteService.buscarPorNombre(nombre, pageable);
+        return ResponseEntity.ok(resultado);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Cliente> actualizar(@PathVariable Long id, @Valid @RequestBody Cliente cliente) {
+        return ResponseEntity.ok(clienteService.actualizar(id, cliente));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> desactivar(@PathVariable Long id) {
-        clienteService.desactivar(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        clienteService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 }
