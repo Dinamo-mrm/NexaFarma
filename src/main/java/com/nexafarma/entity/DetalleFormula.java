@@ -22,6 +22,7 @@ public class DetalleFormula {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "formula_medica_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonBackReference
     private FormulaMedica formulaMedica;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

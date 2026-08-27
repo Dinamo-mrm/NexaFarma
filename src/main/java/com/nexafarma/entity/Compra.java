@@ -45,6 +45,7 @@ public class Compra {
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     private List<DetalleCompra> detalles = new ArrayList<>();
 
     @Column(nullable = false, precision = 12, scale = 2)

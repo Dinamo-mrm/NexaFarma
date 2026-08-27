@@ -57,6 +57,7 @@ public class FormulaMedica {
 
     @OneToMany(mappedBy = "formulaMedica", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     private List<DetalleFormula> detalles = new ArrayList<>();
 
     /** Regla de negocio central: sin fecha de vigencia o vencida, no ampara la venta. */

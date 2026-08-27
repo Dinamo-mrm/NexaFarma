@@ -25,6 +25,7 @@ public class DetalleVenta {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "venta_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonBackReference
     private Venta venta;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

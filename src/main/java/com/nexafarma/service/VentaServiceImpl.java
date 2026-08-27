@@ -143,7 +143,7 @@ public class VentaServiceImpl implements VentaService {
     @Override
     @Transactional(readOnly = true)
     public Venta obtenerPorId(Long id) {
-        return ventaRepository.findById(id)
+        return ventaRepository.findDetalladaById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venta no encontrada con id " + id));
     }
 

@@ -32,7 +32,7 @@ El proyecto está diseñado bajo una arquitectura en capas (Entity, Repository, 
 * Bootstrap
 
 **Base de Datos:**
-* MySQL
+* PostgreSQL (Supabase)
 
 **Herramientas & Pruebas:**
 * Maven / Gradle

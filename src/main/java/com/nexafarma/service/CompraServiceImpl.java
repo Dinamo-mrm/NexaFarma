@@ -5,6 +5,7 @@ import com.nexafarma.exception.ReglaNegocioException;
 import com.nexafarma.exception.ResourceNotFoundException;
 import com.nexafarma.repository.CompraRepository;
 import com.nexafarma.repository.EmpleadoRepository;
+import com.nexafarma.repository.MedicamentoRepository;
 import com.nexafarma.repository.ProveedorRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,17 +22,20 @@ public class CompraServiceImpl implements CompraService {
     private final CompraRepository compraRepository;
     private final ProveedorRepository proveedorRepository;
     private final EmpleadoRepository empleadoRepository;
+    private final MedicamentoRepository medicamentoRepository;
     private final LoteService loteService;
     private final MovimientoInventarioService movimientoInventarioService;
 
     public CompraServiceImpl(CompraRepository compraRepository,
                               ProveedorRepository proveedorRepository,
                               EmpleadoRepository empleadoRepository,
+                              MedicamentoRepository medicamentoRepository,
                               LoteService loteService,
                               MovimientoInventarioService movimientoInventarioService) {
         this.compraRepository = compraRepository;
         this.proveedorRepository = proveedorRepository;
         this.empleadoRepository = empleadoRepository;
+        this.medicamentoRepository = medicamentoRepository;
         this.loteService = loteService;
         this.movimientoInventarioService = movimientoInventarioService;
     }
@@ -62,6 +66,17 @@ public class CompraServiceImpl implements CompraService {
             if (detalle.getCantidad() == null || detalle.getCantidad() <= 0) {
                 throw new ReglaNegocioException("La cantidad de cada item de la compra debe ser mayor a cero");
             }
+            if (detalle.getMedicamento() == null || detalle.getMedicamento().getId() == null) {
+                throw new ReglaNegocioException("Cada item de la compra debe indicar el medicamento");
+            }
+            // El JSON deserializado solo trae el id del medicamento; se
+            // reemplaza por la entidad completa para que la respuesta y el
+            // Lote que se cree al recibir la compra tengan los datos reales.
+            Medicamento medicamento = medicamentoRepository.findById(detalle.getMedicamento().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Medicamento no encontrado con id " + detalle.getMedicamento().getId()));
+            detalle.setMedicamento(medicamento);
+
             BigDecimal subtotalDetalle = detalle.getPrecioUnitario().multiply(BigDecimal.valueOf(detalle.getCantidad()));
             detalle.setSubtotal(subtotalDetalle);
             subtotal = subtotal.add(subtotalDetalle);
@@ -91,7 +106,7 @@ public class CompraServiceImpl implements CompraService {
     @Override
     @Transactional(readOnly = true)
     public Compra obtenerPorId(Long id) {
-        return compraRepository.findById(id)
+        return compraRepository.findDetalladaById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Compra no encontrada con id " + id));
     }
 
