@@ -1,0 +1,103 @@
+:root {
+    --nf-azul-cobalto: #0047AB;
+    --nf-azul-cobalto-oscuro: #003a8c;
+    --nf-gris-oscuro: #333333;
+    --nf-fondo-claro: #F4F6F9;
+}
+
+body {
+    background-color: var(--nf-fondo-claro);
+    color: var(--nf-gris-oscuro);
+    font-family: 'Open Sans', 'Segoe UI', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+    font-family: 'Open Sans', 'Segoe UI', sans-serif;
+    font-weight: 700;
+}
+
+/* Consistencia de color: todo lo interactivo usa el azul cobalto corporativo,
+   no el azul por defecto de Bootstrap. */
+a {
+    color: var(--nf-azul-cobalto);
+}
+
+a:hover {
+    color: var(--nf-azul-cobalto-oscuro);
+}
+
+.btn-primary {
+    background-color: var(--nf-azul-cobalto);
+    border-color: var(--nf-azul-cobalto);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--nf-azul-cobalto-oscuro);
+    border-color: var(--nf-azul-cobalto-oscuro);
+}
+
+.btn-outline-primary,
+.btn-outline-secondary {
+    color: var(--nf-azul-cobalto);
+    border-color: var(--nf-azul-cobalto);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover {
+    background-color: var(--nf-azul-cobalto);
+    border-color: var(--nf-azul-cobalto);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--nf-azul-cobalto);
+    box-shadow: 0 0 0 0.2rem rgba(0, 71, 171, 0.2);
+}
+
+.nav-link.active,
+.navbar-nav .nav-link:hover {
+    color: #ffffff !important;
+    text-decoration: underline;
+}
+
+.card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.table thead {
+    background-color: #eef2fa;
+}
+
+.badge-vigente {
+    background-color: #1e8e3e;
+}
+
+.badge-vencida {
+    background-color: #c62828;
+}
+
+.carrito-item {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.5rem 0;
+}
+
+/* Tarjetas de KPI del panel de control */
+.kpi-card {
+    border-left: 4px solid var(--nf-azul-cobalto);
+}
+
+.kpi-valor {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--nf-gris-oscuro);
+}
+
+.kpi-etiqueta {
+    color: #6c757d;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}

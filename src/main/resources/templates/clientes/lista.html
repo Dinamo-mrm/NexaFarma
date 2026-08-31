@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Clientes')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Clientes</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCliente" onclick="abrirNuevo()">
+            + Nuevo cliente
+        </button>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <input type="search" id="filtroNombre" class="form-control" placeholder="Buscar por nombre..."/>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Nombre completo</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>EPS</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tablaClientes">
+                <tr><td colspan="6" class="text-center text-muted py-4">Cargando clientes…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de creación / edición -->
+<div class="modal fade" id="modalCliente" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" id="formCliente" onsubmit="return guardarCliente(event)">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloModalCliente">Nuevo cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="clienteId"/>
+                <div class="mb-2">
+                    <label class="form-label">Documento *</label>
+                    <input type="text" class="form-control" id="documento" required/>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Nombre completo *</label>
+                    <input type="text" class="form-control" id="nombreCompleto" required/>
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="telefono"/>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Correo</label>
+                        <input type="email" class="form-control" id="correo"/>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Dirección</label>
+                    <input type="text" class="form-control" id="direccion"/>
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Fecha de nacimiento</label>
+                        <input type="date" class="form-control" id="fechaNacimiento"/>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">EPS</label>
+                        <input type="text" class="form-control" id="eps"/>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Alergias conocidas</label>
+                    <textarea class="form-control" id="alergias" rows="2"></textarea>
+                </div>
+                <div id="errorCliente" class="text-danger small"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/clientes.js}"></script>
+</body>
+</html>

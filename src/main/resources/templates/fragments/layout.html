@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${titulo} + ' · NexaFarma'">NexaFarma</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/logo.svg}"/>
+    <!-- Tipografía corporativa: Open Sans (Bold para "Nexa", Regular/Semi-bold para "Farma") -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/nexafarma.css}"/>
+</head>
+<body>
+<!-- Navbar: azul cobalto #0047AB segun la identidad visual "Escudo Vital" -->
+<nav th:fragment="nav" class="navbar navbar-expand-lg navbar-dark mb-4" style="background-color:#0047AB;">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" th:href="@{/}">
+            <img th:src="@{/img/logo.svg}" alt="NexaFarma" width="32" height="32"/>
+            <span><span class="fw-bold">Nexa</span><span class="fw-normal">Farma</span></span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
+                aria-controls="navMenu" aria-expanded="false" aria-label="Alternar navegación">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/}">Panel de control</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/clientes}">Clientes</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/ventas/pos}">Punto de venta</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/formulas-medicas}">Fórmulas médicas</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

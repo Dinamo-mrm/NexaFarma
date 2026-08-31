@@ -28,6 +28,23 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!--
+            Serializa proxies/colecciones LAZY de Hibernate sin lanzar
+            LazyInitializationException: los controladores REST de Dev3
+            devuelven entidades JPA directamente (Venta, Compra, Cliente,
+            FormulaMedica) y el proyecto usa spring.jpa.open-in-view=false,
+            asi que sin este modulo cualquier asociacion no inicializada
+            explota al serializar la respuesta.
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-hibernate6</artifactId>
+            <!-- Debe coincidir con la version de Jackson que trae Spring Boot 3.3.4.
+                 Si `mvn dependency:tree` muestra otra version de com.fasterxml.jackson.core,
+                 ajustar este numero para que coincida. -->
+            <version>2.17.2</version>
+        </dependency>
+
         <!-- Vistas server-side -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

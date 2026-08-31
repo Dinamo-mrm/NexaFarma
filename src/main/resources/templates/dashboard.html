@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Panel de control')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<div class="container">
+    <h2 class="mb-3">Panel de control</h2>
+    <p id="fechaHoy" class="text-muted"></p>
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-etiqueta">Ventas de hoy</div>
+                    <div class="kpi-valor" id="kpiVentasHoyMonto">$0</div>
+                    <div class="text-muted small" id="kpiVentasHoyCantidad">0 ventas</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card kpi-card h-100">
+                <div class="card-body">
+                    <div class="kpi-etiqueta">Clientes activos</div>
+                    <div class="kpi-valor" id="kpiClientes">—</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card kpi-card h-100" style="border-left-color:#c62828;">
+                <div class="card-body">
+                    <div class="kpi-etiqueta">Stock bajo / agotado</div>
+                    <div class="kpi-valor" id="kpiStockBajo">—</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card kpi-card h-100" style="border-left-color:#e0a800;">
+                <div class="card-body">
+                    <div class="kpi-etiqueta">Próximos a vencer (30 días)</div>
+                    <div class="kpi-valor" id="kpiProximosVencer">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Ventas de los últimos 7 días</h5>
+                    <canvas id="graficoVentas" height="110"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Accesos rápidos</h5>
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-primary" th:href="@{/ventas/pos}">+ Registrar venta</a>
+                        <a class="btn btn-outline-primary" th:href="@{/clientes}">Ver clientes</a>
+                        <a class="btn btn-outline-primary" th:href="@{/formulas-medicas}">Fórmulas médicas</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Medicamentos con stock bajo</h5>
+                    <div id="listaStockBajo"><p class="text-muted">Cargando…</p></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lotes próximos a vencer</h5>
+                    <div id="listaProximosVencer"><p class="text-muted">Cargando…</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+</body>
+</html>
