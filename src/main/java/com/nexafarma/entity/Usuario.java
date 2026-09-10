@@ -1,5 +1,6 @@
 package com.nexafarma.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -32,8 +33,9 @@ public class Usuario {
     @Column(nullable = false, length = 60)
     private String username;
 
-    /** Password ya cifrado con {@link PasswordEncoder}, nunca en texto plano. */
+    /** Password ya cifrado con {@link PasswordEncoder}, nunca se expone en respuestas JSON. */
     @NotBlank
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 

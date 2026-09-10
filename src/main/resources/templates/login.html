@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingreso | NexaFarma</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+<main class="login-page">
+    <section class="brand-panel" aria-label="NexaFarma">
+        <div class="brand-content">
+            <img class="brand-logo" th:src="@{/img/logo-nexafarma.png}" alt="Logo de NexaFarma">
+            <p class="brand-name">NexaFarma</p>
+            <p class="brand-message">Tecnología para el cuidado de tu salud.</p>
+        </div>
+    </section>
+
+    <section class="form-panel">
+        <div class="login-card">
+            <div class="mobile-logo">
+                <img th:src="@{/img/logo-nexafarma.png}" alt="Logo de NexaFarma">
+            </div>
+            <p class="eyebrow">PORTAL DE ACCESO</p>
+            <h1>BIENVENIDO A<br>NEXAFARMA</h1>
+            <p class="subtitle">Ingresa tus credenciales para continuar.</p>
+
+            <div class="alert alert-error" th:if="${param.error}" role="alert">
+                Usuario o contraseña incorrectos. Inténtalo nuevamente.
+            </div>
+            <div class="alert alert-success" th:if="${param.logout}" role="status">
+                Tu sesión se cerró correctamente.
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="field-group">
+                    <label for="username">Usuario</label>
+                    <input id="username" name="username" type="text" autocomplete="username"
+                           placeholder="Escribe tu usuario" required autofocus>
+                </div>
+                <div class="field-group">
+                    <label for="password">Contraseña</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password"
+                           placeholder="Escribe tu contraseña" required>
+                </div>
+                <button type="submit">Ingresar al sistema <span aria-hidden="true">→</span></button>
+            </form>
+            <p class="help-text">Si no tienes credenciales, comunícate con el administrador.</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>
