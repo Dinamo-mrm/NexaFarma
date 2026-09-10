@@ -30,7 +30,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> crear(@RequestBody CrearUsuarioRequest request) {
+    public ResponseEntity<Usuario> crear(@jakarta.validation.Valid @RequestBody CrearUsuarioRequest request) {
         Usuario creado = usuarioService.crear(request.empleadoId(), request.username(), request.password(), request.rol());
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
@@ -41,7 +41,7 @@ public class UsuarioController {
     }
 
     @PatchMapping("/{id}/password")
-    public ResponseEntity<Void> cambiarPassword(@PathVariable Long id, @RequestBody CambiarPasswordRequest request) {
+    public ResponseEntity<Void> cambiarPassword(@PathVariable Long id, @jakarta.validation.Valid @RequestBody CambiarPasswordRequest request) {
         usuarioService.cambiarPassword(id, request.passwordActual(), request.passwordNueva());
         return ResponseEntity.noContent().build();
     }
