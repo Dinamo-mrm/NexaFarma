@@ -30,6 +30,30 @@
                 <li class="nav-item"><a class="nav-link" th:href="@{/clientes}">Clientes</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/ventas/pos}">Punto de venta</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/formulas-medicas}">Fórmulas médicas</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Catálogo</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/medicamentos}">Medicamentos</a></li>
+                        <li><a class="dropdown-item" th:href="@{/categorias}">Categorías</a></li>
+                        <li><a class="dropdown-item" th:href="@{/proveedores}">Proveedores</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Operaciones</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/inventario}">Inventario y lotes</a></li>
+                        <li><a class="dropdown-item" th:href="@{/compras}">Compras</a></li>
+                        <li><a class="dropdown-item" th:href="@{/devoluciones}">Devoluciones</a></li>
+                        <li><a class="dropdown-item" th:href="@{/domicilios}">Domicilios</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Administración</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/empleados}">Empleados</a></li>
+                        <li><a class="dropdown-item" th:href="@{/usuarios}">Usuarios</a></li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>

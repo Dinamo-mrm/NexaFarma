@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Inventario y lotes')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Inventario y lotes</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalLote">+ Registrar lote</button>
+    </div>
+
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabStockBajo">Stock bajo / agotado</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabVencidos">Lotes vencidos</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabProximos">Próximos a vencer</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabBuscar">Buscar por medicamento</button></li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="tabStockBajo">
+            <div class="card"><div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Medicamento</th><th>Disponible</th><th>Mínimo</th></tr></thead>
+                    <tbody id="tablaStockBajo"><tr><td colspan="3" class="text-center text-muted py-4">Cargando…</td></tr></tbody>
+                </table>
+            </div></div>
+        </div>
+
+        <div class="tab-pane fade" id="tabVencidos">
+            <div class="card"><div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Medicamento</th><th>Lote</th><th>Vencimiento</th><th>Cantidad</th></tr></thead>
+                    <tbody id="tablaVencidos"><tr><td colspan="4" class="text-center text-muted py-4">Cargando…</td></tr></tbody>
+                </table>
+            </div></div>
+        </div>
+
+        <div class="tab-pane fade" id="tabProximos">
+            <div class="card"><div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Medicamento</th><th>Lote</th><th>Vencimiento</th><th>Cantidad</th></tr></thead>
+                    <tbody id="tablaProximos"><tr><td colspan="4" class="text-center text-muted py-4">Cargando…</td></tr></tbody>
+                </table>
+            </div></div>
+        </div>
+
+        <div class="tab-pane fade" id="tabBuscar">
+            <div class="card mb-3"><div class="card-body">
+                <div class="input-group">
+                    <input type="number" id="medicamentoIdBuscar" class="form-control" placeholder="Id del medicamento"/>
+                    <button class="btn btn-outline-secondary" onclick="buscarPorMedicamento()">Buscar</button>
+                </div>
+            </div></div>
+            <div class="card"><div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Lote</th><th>Fabricación</th><th>Vencimiento</th><th>Cantidad</th><th>Estado</th></tr></thead>
+                    <tbody id="tablaBuscarLotes"><tr><td colspan="5" class="text-center text-muted py-4">Ingresa un id de medicamento</td></tr></tbody>
+                </table>
+            </div></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal registrar lote -->
+<div class="modal fade" id="modalLote" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" id="formLote" onsubmit="return registrarLote(event)">
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar lote</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <label class="form-label">Id del medicamento *</label>
+                    <input type="number" class="form-control" id="loteMedicamentoId" required/>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Número de lote *</label>
+                    <input type="text" class="form-control" id="numeroLote" required/>
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Fecha de fabricación *</label>
+                        <input type="date" class="form-control" id="fechaFabricacion" required/>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Fecha de vencimiento *</label>
+                        <input type="date" class="form-control" id="fechaVencimiento" required/>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Cantidad *</label>
+                    <input type="number" class="form-control" id="cantidadLote" min="1" required/>
+                </div>
+                <p class="text-muted small mb-0">
+                    Nota: registrar un lote suelto no actualiza el inventario agregado del medicamento
+                    (eso ocurre al <a th:href="@{/compras}">recibir una compra</a>). Usa esta opción solo
+                    para ajustes manuales de lotes existentes.
+                </p>
+                <div id="errorLote" class="text-danger small mt-2"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Registrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/inventario.js}"></script>
+</body>
+</html>

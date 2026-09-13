@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Domicilios')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Domicilios</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDomicilio">+ Nuevo domicilio</button>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <label class="form-label small mb-1">Filtrar por estado</label>
+            <select id="filtroEstado" class="form-select w-auto d-inline-block" onchange="cargarDomicilios()">
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="EN_PREPARACION">En preparación</option>
+                <option value="EN_CAMINO">En camino</option>
+                <option value="ENTREGADO">Entregado</option>
+                <option value="CANCELADO">Cancelado</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="listaDomicilios"><p class="text-muted">Cargando…</p></div>
+</div>
+
+<div class="modal fade" id="modalDomicilio" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content" id="formDomicilio" onsubmit="return registrarDomicilio(event)">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo domicilio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Id de la venta *</label>
+                        <input type="number" class="form-control" id="ventaId" required/>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Id del cliente *</label>
+                        <input type="number" class="form-control" id="clienteId" required/>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Dirección de entrega *</label>
+                    <input type="text" class="form-control" id="direccionEntrega" required/>
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Teléfono de contacto *</label>
+                        <input type="text" class="form-control" id="telefonoContacto" required/>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Valor del domicilio</label>
+                        <input type="number" class="form-control" id="valorDomicilio" min="0" step="0.01"/>
+                    </div>
+                </div>
+                <div id="errorDomicilio" class="text-danger small"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Registrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/domicilios.js}"></script>
+</body>
+</html>
