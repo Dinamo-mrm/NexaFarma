@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Reportes')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: nav}"></nav>
+
+<div class="container-fluid-nf">
+    <h1 class="page-title">Centro de reportes</h1>
+    <p class="page-subtitle">Consulta métricas de ventas, inventario, compras y personal. Exporta a CSV o imprime a PDF.</p>
+
+    <!-- Filtros de periodo -->
+    <div class="reporte-filtros mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small text-muted mb-1">Desde</label>
+                <input type="date" id="filtroDesde" class="form-control"/>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted mb-1">Hasta</label>
+                <input type="date" id="filtroHasta" class="form-control"/>
+            </div>
+            <div class="col-md-4">
+                <div class="pill-toggle" id="presetsPeriodo">
+                    <button type="button" class="pill-btn" data-dias="0">Hoy</button>
+                    <button type="button" class="pill-btn" data-dias="7">7 días</button>
+                    <button type="button" class="pill-btn active" data-dias="mes">Mes</button>
+                    <button type="button" class="pill-btn" data-dias="30">30 días</button>
+                </div>
+            </div>
+            <div class="col-md-2 text-md-end">
+                <button type="button" class="btn btn-primary w-100" id="btnAplicarFiltros">Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catálogo de reportes -->
+    <div class="row g-3 mb-4" id="seccionCatalogo">
+        <div class="col-md-6 col-lg-3" id="ventas">
+            <div class="card reporte-card" data-reporte="ventas">
+                <div class="card-body">
+                    <div class="icon-wrap">📊</div>
+                    <h5 class="mb-1">Ventas</h5>
+                    <p class="text-muted small mb-0">Resumen, detalle, método de pago y top productos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3" id="inventario">
+            <div class="card reporte-card" data-reporte="inventario">
+                <div class="card-body">
+                    <div class="icon-wrap">📦</div>
+                    <h5 class="mb-1">Inventario</h5>
+                    <p class="text-muted small mb-0">Stock bajo, vencimientos e inventario valorizado</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3" id="compras">
+            <div class="card reporte-card" data-reporte="compras">
+                <div class="card-body">
+                    <div class="icon-wrap">🛒</div>
+                    <h5 class="mb-1">Compras</h5>
+                    <p class="text-muted small mb-0">Compras agrupadas por proveedor</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3" id="clientes">
+            <div class="card reporte-card" data-reporte="personas">
+                <div class="card-body">
+                    <div class="icon-wrap">👥</div>
+                    <h5 class="mb-1">Clientes y empleados</h5>
+                    <p class="text-muted small mb-0">Clientes frecuentes y ranking de vendedores</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card reporte-card" data-reporte="ganancias">
+                <div class="card-body">
+                    <div class="icon-wrap">💰</div>
+                    <h5 class="mb-1">Ganancias</h5>
+                    <p class="text-muted small mb-0">Ingresos, costo estimado y margen del periodo</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card reporte-card" data-reporte="formulas">
+                <div class="card-body">
+                    <div class="icon-wrap">📋</div>
+                    <h5 class="mb-1">Fórmulas médicas</h5>
+                    <p class="text-muted small mb-0">Fórmulas registradas en el periodo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de resultado -->
+    <div class="card d-none" id="panelResultado">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <h5 class="mb-0" id="tituloResultado">Resultado</h5>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="btnExportCsv">Exportar CSV</button>
+                    <button type="button" class="btn btn-dark btn-sm" id="btnImprimir">Imprimir / PDF</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnCerrarResultado">Cerrar</button>
+                </div>
+            </div>
+            <div id="kpisResultado" class="row g-3 mb-3"></div>
+            <div class="table-responsive">
+                <table class="table table-hover" id="tablaResultado">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <p class="text-muted small mb-0" id="msgVacio"></p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/reportes.js}"></script>
+</body>
+</html>
