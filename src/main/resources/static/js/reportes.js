@@ -7,38 +7,37 @@
   function hoyISO() {
     return new Date().toISOString().slice(0, 10);
   }
-
   function haceDias(n) {
     const d = new Date();
     d.setDate(d.getDate() - n);
     return d.toISOString().slice(0, 10);
   }
-
   function inicioMes() {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
   }
-
   function params() {
     const desde = $('#filtroDesde').value || inicioMes();
     const hasta = $('#filtroHasta').value || hoyISO();
     return new URLSearchParams({ desde, hasta });
   }
-
   function money(v) {
     if (v == null) return '—';
     const n = Number(v);
-    return isNaN(n) ? v : n.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+    return isNaN(n)
+      ? v
+      : n.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
   }
-
-  async function api(path) {
-    const q = params().toString();
+  async function api(path, extraParams) {
+    const q = new URLSearchParams(params());
+    if (extraParams) {
+      Object.entries(extraParams).forEach(([k, v]) => q.set(k, v));
+    }
     const sep = path.includes('?') ? '&' : '?';
-    const res = await fetch(path + sep + q);
-    if (!res.ok) throw new Error('Error ' + res.status);
+    const res = await fetch(path + sep + q.toString());
+    if (!res.ok) throw new Error('Error ' + res.status + ' al cargar el reporte');
     return res.json();
   }
-
   function setPeriodo(tipo) {
     const hasta = hoyISO();
     let desde;
@@ -52,6 +51,7 @@
   let lastRows = [];
   let lastHeaders = [];
   let lastTitle = '';
+  let lastLoader = null;
 
   function showResult(title, headers, rows, kpis) {
     lastTitle = title;
@@ -80,67 +80,142 @@
       $('#msgVacio').textContent = 'No hay datos para el periodo seleccionado.';
       return;
     }
-    $('#msgVacio').textContent = '';
+    $('#msgVacio').textContent = rows.length + ' registro(s).';
     rows.forEach((r) => {
       const tr = document.createElement('tr');
-      tr.innerHTML = r.map((c) => `<td>${c == null ? '—' : c}</td>`).join('');
+      tr.innerHTML = r.map((c) => `<td>${c == null || c === '' ? '—' : c}</td>`).join('');
       tbody.appendChild(tr);
     });
     $('#panelResultado').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  async function cargarVentas() {
-    const [resumen, detalle, metodos, top] = await Promise.all([
+  async function reporteVentasTipo(tipo, titulo) {
+    const resumen = await api('/api/reportes/ventas/resumen', { tipo });
+    // Ajustar filtros visibles al tipo
+    if (resumen.desde) $('#filtroDesde').value = resumen.desde;
+    if (resumen.hasta) $('#filtroHasta').value = resumen.hasta;
+    const detalle = await api('/api/reportes/ventas/detalle');
+    showResult(titulo,
+      ['Nº', 'Fecha', 'Cliente', 'Empleado', 'Método', 'Total', 'Estado'],
+      detalle.map((v) => [
+        v.numeroVenta,
+        (v.fecha || '').replace('T', ' ').slice(0, 16),
+        v.cliente, v.empleado, v.metodoPago, money(v.total), v.estado,
+      ]),
+      [
+        { label: 'Ventas', value: resumen.cantidadVentas },
+        { label: 'Total', value: money(resumen.total) },
+        { label: 'Ticket prom.', value: money(resumen.ticketPromedio) },
+        { label: 'Periodo', value: resumen.tipoPeriodo || tipo },
+      ]);
+  }
+
+  async function reporteVentasDetalle() {
+    const [resumen, detalle] = await Promise.all([
       api('/api/reportes/ventas/resumen'),
       api('/api/reportes/ventas/detalle'),
-      api('/api/reportes/ventas/metodo-pago'),
-      api('/api/reportes/medicamentos/mas-vendidos?limite=10'),
     ]);
-    const kpis = [
-      { label: 'Ventas', value: resumen.cantidadVentas },
-      { label: 'Total', value: money(resumen.total) },
-      { label: 'Ticket prom.', value: money(resumen.ticketPromedio) },
-      { label: 'Métodos', value: metodos.length },
-    ];
-    const headers = ['Nº', 'Fecha', 'Cliente', 'Empleado', 'Método', 'Total', 'Estado'];
-    const rows = detalle.map((v) => [
-      v.numeroVenta, (v.fecha || '').replace('T', ' ').slice(0, 16),
-      v.cliente, v.empleado, v.metodoPago, money(v.total), v.estado,
-    ]);
-    // Añadir bloque top productos al final como filas extra en msg
-    showResult('Ventas del periodo', headers, rows, kpis);
-    if (top.length) {
-      const extra = document.createElement('div');
-      extra.className = 'mt-3';
-      extra.innerHTML = '<h6 class="text-muted">Top medicamentos</h6><ul class="mb-0">' +
-        top.map((t) => `<li>${t.nombre || '—'} — ${t.unidades} uds · ${money(t.monto)}</li>`).join('') +
-        '</ul>';
-      $('#panelResultado .card-body').appendChild(extra);
-    }
+    showResult('Detalle de ventas',
+      ['Nº', 'Fecha', 'Cliente', 'Empleado', 'Método', 'Total', 'Estado'],
+      detalle.map((v) => [
+        v.numeroVenta, (v.fecha || '').replace('T', ' ').slice(0, 16),
+        v.cliente, v.empleado, v.metodoPago, money(v.total), v.estado,
+      ]),
+      [
+        { label: 'Ventas', value: resumen.cantidadVentas },
+        { label: 'Total', value: money(resumen.total) },
+        { label: 'Ticket prom.', value: money(resumen.ticketPromedio) },
+      ]);
   }
 
-  async function cargarInventario() {
-    const [stock, venc, val] = await Promise.all([
-      api('/api/reportes/inventario/stock-bajo'),
-      api('/api/reportes/inventario/vencimientos'),
-      api('/api/reportes/inventario/valorizado'),
-    ]);
-    const totalValor = val.reduce((s, r) => s + Number(r.valorVenta || 0), 0);
-    const kpis = [
-      { label: 'Stock bajo/agotado', value: stock.length },
-      { label: 'Vencimientos', value: venc.length },
-      { label: 'Ítems valorizados', value: val.length },
-      { label: 'Valor inventario', value: money(totalValor) },
-    ];
-    const headers = ['Tipo', 'Producto / Lote', 'Detalle', 'Cantidad', 'Estado'];
-    const rows = [
-      ...stock.map((s) => ['Stock', s.nombre, `Mín: ${s.stockMinimo}`, s.disponible, s.estado]),
-      ...venc.map((v) => ['Vencimiento', v.medicamento, `Lote ${v.numeroLote} · ${v.fechaVencimiento}`, v.cantidad, v.estado]),
-    ];
-    showResult('Inventario y vencimientos', headers, rows, kpis);
+  async function reporteMetodoPago() {
+    const data = await api('/api/reportes/ventas/metodo-pago');
+    const total = data.reduce((s, r) => s + Number(r.total || 0), 0);
+    showResult('Ventas por método de pago',
+      ['Método', 'Cantidad', 'Total'],
+      data.map((r) => [r.metodoPago, r.cantidad, money(r.total)]),
+      [{ label: 'Métodos', value: data.length }, { label: 'Total', value: money(total) }]);
   }
 
-  async function cargarCompras() {
+  async function reporteCategoria() {
+    const data = await api('/api/reportes/ventas/por-categoria');
+    const total = data.reduce((s, r) => s + Number(r.monto || 0), 0);
+    showResult('Ventas por categoría',
+      ['Categoría', 'Unidades', 'Monto'],
+      data.map((r) => [r.categoria, r.unidades, money(r.monto)]),
+      [{ label: 'Categorías', value: data.length }, { label: 'Total', value: money(total) }]);
+  }
+
+  async function reporteRanking(path, titulo) {
+    const data = await api(path, { limite: 15 });
+    showResult(titulo,
+      ['Medicamento', 'Unidades', 'Monto'],
+      data.map((r) => [r.nombre, r.unidades, money(r.monto)]),
+      [{ label: 'Ítems', value: data.length }]);
+  }
+
+  async function reporteStockBajo() {
+    const data = await api('/api/reportes/inventario/stock-bajo');
+    showResult('Productos con stock bajo',
+      ['Medicamento', 'Disponible', 'Mínimo', 'Proveedor', 'Estado'],
+      data.map((r) => [r.nombre, r.disponible, r.stockMinimo, r.proveedor, r.estado]),
+      [{ label: 'Alertas', value: data.length }]);
+  }
+
+  async function reporteAgotados() {
+    const data = await api('/api/reportes/inventario/agotados');
+    showResult('Productos agotados',
+      ['Medicamento', 'Disponible', 'Mínimo', 'Proveedor', 'Estado'],
+      data.map((r) => [r.nombre, r.disponible, r.stockMinimo, r.proveedor, r.estado]),
+      [{ label: 'Agotados', value: data.length }]);
+  }
+
+  async function reporteProximos() {
+    const data = await api('/api/reportes/inventario/proximos-vencer', { dias: 30 });
+    showResult('Medicamentos próximos a vencer (30 días)',
+      ['Medicamento', 'Lote', 'Vencimiento', 'Cantidad', 'Proveedor'],
+      data.map((r) => [r.medicamento, r.numeroLote, r.fechaVencimiento, r.cantidad, r.proveedor]),
+      [{ label: 'Lotes', value: data.length }]);
+  }
+
+  async function reporteVencidos() {
+    const data = await api('/api/reportes/inventario/vencidos');
+    showResult('Medicamentos vencidos',
+      ['Medicamento', 'Lote', 'Vencimiento', 'Cantidad', 'Proveedor'],
+      data.map((r) => [r.medicamento, r.numeroLote, r.fechaVencimiento, r.cantidad, r.proveedor]),
+      [{ label: 'Lotes vencidos', value: data.length }]);
+  }
+
+  async function reporteValorizado() {
+    const data = await api('/api/reportes/inventario/valorizado');
+    const valorVenta = data.reduce((s, r) => s + Number(r.valorVenta || 0), 0);
+    const valorCosto = data.reduce((s, r) => s + Number(r.valorCosto || 0), 0);
+    showResult('Inventario valorizado',
+      ['Medicamento', 'Disp.', 'P. venta', 'P. compra', 'Valor venta', 'Valor costo', 'Proveedor', 'Categoría'],
+      data.map((r) => [
+        r.nombre, r.disponible, money(r.precioVenta), money(r.precioCompra),
+        money(r.valorVenta), money(r.valorCosto), r.proveedor, r.categoria,
+      ]),
+      [
+        { label: 'Ítems', value: data.length },
+        { label: 'Valor venta', value: money(valorVenta) },
+        { label: 'Valor costo', value: money(valorCosto) },
+      ]);
+  }
+
+  async function reporteMovimientos() {
+    const data = await api('/api/reportes/inventario/movimientos');
+    showResult('Movimientos de inventario',
+      ['Fecha', 'Tipo', 'Medicamento', 'Cant.', 'Ant.', 'Nueva', 'Motivo', 'Responsable'],
+      data.map((r) => [
+        (r.fecha || '').replace('T', ' ').slice(0, 16),
+        r.tipo, r.medicamento, r.cantidad, r.existenciaAnterior, r.nuevaExistencia,
+        r.motivo, r.responsable,
+      ]),
+      [{ label: 'Movimientos', value: data.length }]);
+  }
+
+  async function reporteComprasProveedor() {
     const data = await api('/api/reportes/compras/por-proveedor');
     const total = data.reduce((s, r) => s + Number(r.total || 0), 0);
     showResult('Compras por proveedor',
@@ -152,25 +227,25 @@
       ]);
   }
 
-  async function cargarPersonas() {
-    const [cli, emp] = await Promise.all([
-      api('/api/reportes/clientes/frecuentes?limite=15'),
-      api('/api/reportes/empleados/mayores-ventas?limite=15'),
-    ]);
-    const headers = ['Tipo', 'Nombre', 'Operaciones', 'Monto'];
-    const rows = [
-      ...cli.map((c) => ['Cliente', c.nombre, c.compras, money(c.monto)]),
-      ...emp.map((e) => ['Empleado', e.nombre, e.ventas, money(e.monto)]),
-    ];
-    showResult('Clientes frecuentes y empleados', headers, rows, [
-      { label: 'Clientes top', value: cli.length },
-      { label: 'Empleados', value: emp.length },
-    ]);
+  async function reporteClientes() {
+    const data = await api('/api/reportes/clientes/frecuentes', { limite: 20 });
+    showResult('Clientes frecuentes',
+      ['Cliente', 'Compras', 'Monto'],
+      data.map((r) => [r.nombre, r.compras, money(r.monto)]),
+      [{ label: 'Clientes', value: data.length }]);
   }
 
-  async function cargarGanancias() {
+  async function reporteEmpleados() {
+    const data = await api('/api/reportes/empleados/mayores-ventas', { limite: 20 });
+    showResult('Empleados con mayores ventas',
+      ['Empleado', 'Ventas', 'Monto'],
+      data.map((r) => [r.nombre, r.ventas, money(r.monto)]),
+      [{ label: 'Empleados', value: data.length }]);
+  }
+
+  async function reporteGanancias() {
     const g = await api('/api/reportes/ganancias');
-    showResult('Ganancias del periodo',
+    showResult('Ganancias por periodo',
       ['Concepto', 'Valor'],
       [
         ['Ingresos por ventas', money(g.ingresos)],
@@ -184,7 +259,7 @@
       ]);
   }
 
-  async function cargarFormulas() {
+  async function reporteFormulas() {
     const data = await api('/api/reportes/formulas');
     showResult('Fórmulas médicas registradas',
       ['Fecha', 'Cliente', 'Médico', 'Entidad', 'Duración (días)'],
@@ -193,24 +268,44 @@
   }
 
   const loaders = {
-    ventas: cargarVentas,
-    inventario: cargarInventario,
-    compras: cargarCompras,
-    personas: cargarPersonas,
-    ganancias: cargarGanancias,
-    formulas: cargarFormulas,
+    'ventas-diarias': () => reporteVentasTipo('DIARIO', 'Ventas diarias'),
+    'ventas-semanales': () => reporteVentasTipo('SEMANAL', 'Ventas semanales'),
+    'ventas-mensuales': () => reporteVentasTipo('MENSUAL', 'Ventas mensuales'),
+    'ventas-detalle': reporteVentasDetalle,
+    'ventas-metodo': reporteMetodoPago,
+    'ventas-categoria': reporteCategoria,
+    'mas-vendidos': () => reporteRanking('/api/reportes/medicamentos/mas-vendidos', 'Medicamentos más vendidos'),
+    'menos-vendidos': () => reporteRanking('/api/reportes/medicamentos/menos-vendidos', 'Productos menos vendidos'),
+    'stock-bajo': reporteStockBajo,
+    'agotados': reporteAgotados,
+    'proximos-vencer': reporteProximos,
+    'vencidos': reporteVencidos,
+    'valorizado': reporteValorizado,
+    'movimientos': reporteMovimientos,
+    'compras-proveedor': reporteComprasProveedor,
+    'clientes': reporteClientes,
+    'empleados': reporteEmpleados,
+    'ganancias': reporteGanancias,
+    'formulas': reporteFormulas,
   };
 
   function exportCsv() {
-    if (!lastRows.length) return;
-    const lines = [lastHeaders.join(',')];
+    if (!lastHeaders.length) return;
+    const lines = [lastHeaders.join(';')];
     lastRows.forEach((r) => {
-      lines.push(r.map((c) => {
-        const s = c == null ? '' : String(c);
-        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-      }).join(','));
+      lines.push(
+        r
+          .map((c) => {
+            const s = c == null ? '' : String(c);
+            return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+          })
+          .join(';')
+      );
     });
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    // BOM para que Excel abra UTF-8 correctamente
+    const blob = new Blob(['\ufeff' + lines.join('\n')], {
+      type: 'text/csv;charset=utf-8;',
+    });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = (lastTitle || 'reporte').replace(/\s+/g, '_').toLowerCase() + '.csv';
@@ -227,17 +322,15 @@
       });
     });
     $('#btnAplicarFiltros').addEventListener('click', () => {
-      // Si hay un reporte abierto, recargar el último
+      if (lastLoader) lastLoader().catch((e) => alert(e.message));
     });
     $$('.reporte-card').forEach((card) => {
       card.addEventListener('click', async () => {
         const tipo = card.dataset.reporte;
         const fn = loaders[tipo];
         if (!fn) return;
+        lastLoader = fn;
         try {
-          // limpiar extras previos
-          const extras = $$('#panelResultado .card-body > div.mt-3');
-          extras.forEach((e) => e.remove());
           await fn();
         } catch (e) {
           alert('No se pudo cargar el reporte: ' + e.message);
@@ -249,13 +342,6 @@
     $('#btnCerrarResultado').addEventListener('click', () => {
       $('#panelResultado').classList.add('d-none');
     });
-
-    // Deep-link por hash
-    const hash = (location.hash || '').replace('#', '');
-    if (hash && loaders[hash === 'clientes' ? 'personas' : hash]) {
-      const key = hash === 'clientes' ? 'personas' : hash;
-      setTimeout(() => loaders[key]().catch(() => {}), 200);
-    }
   }
 
   document.addEventListener('DOMContentLoaded', init);

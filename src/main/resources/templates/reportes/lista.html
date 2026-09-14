@@ -6,9 +6,11 @@
 
 <div class="container-fluid-nf">
     <h1 class="page-title">Centro de reportes</h1>
-    <p class="page-subtitle">Consulta métricas de ventas, inventario, compras y personal. Exporta a CSV o imprime a PDF.</p>
+    <p class="page-subtitle">
+        FarmaSoft Plus §13 — ventas, inventario, compras por proveedor (asociado a medicamentos),
+        personal y fórmulas. Exporta a Excel (CSV) o imprime a PDF.
+    </p>
 
-    <!-- Filtros de periodo -->
     <div class="reporte-filtros mb-4">
         <div class="row g-3 align-items-end">
             <div class="col-md-3">
@@ -27,77 +29,53 @@
                     <button type="button" class="pill-btn" data-dias="30">30 días</button>
                 </div>
             </div>
-            <div class="col-md-2 text-md-end">
+            <div class="col-md-2">
                 <button type="button" class="btn btn-primary w-100" id="btnAplicarFiltros">Aplicar</button>
             </div>
         </div>
     </div>
 
-    <!-- Catálogo de reportes -->
-    <div class="row g-3 mb-4" id="seccionCatalogo">
-        <div class="col-md-6 col-lg-3" id="ventas">
-            <div class="card reporte-card" data-reporte="ventas">
-                <div class="card-body">
-                    <div class="icon-wrap">📊</div>
-                    <h5 class="mb-1">Ventas</h5>
-                    <p class="text-muted small mb-0">Resumen, detalle, método de pago y top productos</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3" id="inventario">
-            <div class="card reporte-card" data-reporte="inventario">
-                <div class="card-body">
-                    <div class="icon-wrap">📦</div>
-                    <h5 class="mb-1">Inventario</h5>
-                    <p class="text-muted small mb-0">Stock bajo, vencimientos e inventario valorizado</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3" id="compras">
-            <div class="card reporte-card" data-reporte="compras">
-                <div class="card-body">
-                    <div class="icon-wrap">🛒</div>
-                    <h5 class="mb-1">Compras</h5>
-                    <p class="text-muted small mb-0">Compras agrupadas por proveedor</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3" id="clientes">
-            <div class="card reporte-card" data-reporte="personas">
-                <div class="card-body">
-                    <div class="icon-wrap">👥</div>
-                    <h5 class="mb-1">Clientes y empleados</h5>
-                    <p class="text-muted small mb-0">Clientes frecuentes y ranking de vendedores</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card reporte-card" data-reporte="ganancias">
-                <div class="card-body">
-                    <div class="icon-wrap">💰</div>
-                    <h5 class="mb-1">Ganancias</h5>
-                    <p class="text-muted small mb-0">Ingresos, costo estimado y margen del periodo</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card reporte-card" data-reporte="formulas">
-                <div class="card-body">
-                    <div class="icon-wrap">📋</div>
-                    <h5 class="mb-1">Fórmulas médicas</h5>
-                    <p class="text-muted small mb-0">Fórmulas registradas en el periodo</p>
-                </div>
-            </div>
-        </div>
+    <h6 class="text-muted text-uppercase small mb-2">Ventas</h6>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="ventas-diarias"><div class="card-body"><div class="icon-wrap">📅</div><h6 class="mb-1">Ventas diarias</h6><p class="text-muted small mb-0">Hoy</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="ventas-semanales"><div class="card-body"><div class="icon-wrap">📆</div><h6 class="mb-1">Ventas semanales</h6><p class="text-muted small mb-0">Últimos 7 días</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="ventas-mensuales"><div class="card-body"><div class="icon-wrap">🗓️</div><h6 class="mb-1">Ventas mensuales</h6><p class="text-muted small mb-0">Mes en curso</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="ventas-detalle"><div class="card-body"><div class="icon-wrap">🧾</div><h6 class="mb-1">Detalle de ventas</h6><p class="text-muted small mb-0">Periodo filtrado</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="ventas-metodo"><div class="card-body"><div class="icon-wrap">💳</div><h6 class="mb-1">Por método de pago</h6><p class="text-muted small mb-0">Efectivo, tarjeta…</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="ventas-categoria"><div class="card-body"><div class="icon-wrap">🏷️</div><h6 class="mb-1">Por categoría</h6><p class="text-muted small mb-0">Ventas agrupadas</p></div></div></div>
     </div>
 
-    <!-- Área de resultado -->
+    <h6 class="text-muted text-uppercase small mb-2">Productos</h6>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="mas-vendidos"><div class="card-body"><div class="icon-wrap">⬆️</div><h6 class="mb-1">Más vendidos</h6><p class="text-muted small mb-0">Top medicamentos</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="menos-vendidos"><div class="card-body"><div class="icon-wrap">⬇️</div><h6 class="mb-1">Menos vendidos</h6><p class="text-muted small mb-0">Incluye sin ventas</p></div></div></div>
+    </div>
+
+    <h6 class="text-muted text-uppercase small mb-2">Inventario y vencimientos</h6>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="stock-bajo"><div class="card-body"><div class="icon-wrap">⚠️</div><h6 class="mb-1">Stock bajo</h6><p class="text-muted small mb-0">Con proveedor</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="agotados"><div class="card-body"><div class="icon-wrap">🚫</div><h6 class="mb-1">Agotados</h6><p class="text-muted small mb-0">Disponible = 0</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="proximos-vencer"><div class="card-body"><div class="icon-wrap">⏳</div><h6 class="mb-1">Próximos a vencer</h6><p class="text-muted small mb-0">30 días</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="vencidos"><div class="card-body"><div class="icon-wrap">⛔</div><h6 class="mb-1">Vencidos</h6><p class="text-muted small mb-0">Lotes vencidos</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="valorizado"><div class="card-body"><div class="icon-wrap">💎</div><h6 class="mb-1">Inventario valorizado</h6><p class="text-muted small mb-0">Costo y venta</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="movimientos"><div class="card-body"><div class="icon-wrap">🔄</div><h6 class="mb-1">Movimientos</h6><p class="text-muted small mb-0">Entradas / salidas</p></div></div></div>
+    </div>
+
+    <h6 class="text-muted text-uppercase small mb-2">Compras, personal y finanzas</h6>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="compras-proveedor"><div class="card-body"><div class="icon-wrap">🏪</div><h6 class="mb-1">Compras por proveedor</h6><p class="text-muted small mb-0">Ligados a medicamentos</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="clientes"><div class="card-body"><div class="icon-wrap">👤</div><h6 class="mb-1">Clientes frecuentes</h6><p class="text-muted small mb-0">Ranking del periodo</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="empleados"><div class="card-body"><div class="icon-wrap">🧑‍💼</div><h6 class="mb-1">Empleados top ventas</h6><p class="text-muted small mb-0">Monto generado</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="ganancias"><div class="card-body"><div class="icon-wrap">💰</div><h6 class="mb-1">Ganancias</h6><p class="text-muted small mb-0">Ingresos − costo</p></div></div></div>
+        <div class="col-md-4 col-lg-3"><div class="card reporte-card" data-reporte="formulas"><div class="card-body"><div class="icon-wrap">📋</div><h6 class="mb-1">Fórmulas médicas</h6><p class="text-muted small mb-0">Registradas en periodo</p></div></div></div>
+    </div>
+
     <div class="card d-none" id="panelResultado">
         <div class="card-body">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <h5 class="mb-0" id="tituloResultado">Resultado</h5>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-primary btn-sm" id="btnExportCsv">Exportar CSV</button>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="btnExportCsv">Exportar Excel (CSV)</button>
                     <button type="button" class="btn btn-dark btn-sm" id="btnImprimir">Imprimir / PDF</button>
                     <button type="button" class="btn btn-secondary btn-sm" id="btnCerrarResultado">Cerrar</button>
                 </div>

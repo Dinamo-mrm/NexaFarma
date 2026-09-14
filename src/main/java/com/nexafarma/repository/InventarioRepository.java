@@ -13,9 +13,13 @@ public interface InventarioRepository extends JpaRepository<Inventario, Long> {
 
     Optional<Inventario> findByMedicamentoId(Long medicamentoId);
 
-    @Query("SELECT i FROM Inventario i JOIN FETCH i.medicamento WHERE i.cantidadDisponible <= i.stockMinimo")
+    @Query("SELECT i FROM Inventario i JOIN FETCH i.medicamento m LEFT JOIN FETCH m.proveedor WHERE i.cantidadDisponible <= i.stockMinimo")
     List<Inventario> findConStockBajo();
 
-    @Query("SELECT i FROM Inventario i JOIN FETCH i.medicamento WHERE i.cantidadDisponible <= 0")
+    @Query("SELECT i FROM Inventario i JOIN FETCH i.medicamento m LEFT JOIN FETCH m.proveedor WHERE i.cantidadDisponible <= 0")
     List<Inventario> findAgotados();
+
+    @Query("SELECT i FROM Inventario i JOIN FETCH i.medicamento m LEFT JOIN FETCH m.proveedor LEFT JOIN FETCH m.categoria")
+    List<Inventario> findAllConMedicamento();
 }
+

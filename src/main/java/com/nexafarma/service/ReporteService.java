@@ -6,42 +6,58 @@ import java.util.Map;
 
 /**
  * Agregaciones de negocio para el módulo de Reportes (FarmaSoft Plus §13).
+ * Incluye ventas por periodo, ranking de productos, clientes, empleados,
+ * inventario, compras por proveedor (asociado a medicamentos), movimientos
+ * y fórmulas. La exportación a CSV/Excel e impresión PDF se resuelve en la UI.
  */
 public interface ReporteService {
 
-    /** Resumen de ventas en un rango (total, cantidad, ticket promedio). */
     Map<String, Object> resumenVentas(LocalDate desde, LocalDate hasta);
 
-    /** Listado de ventas pagadas en el rango (para tabla / export). */
+    /**
+     * Resumen predefinido: diario (hoy), semanal (últimos 7 días) o mensual (mes en curso).
+     * @param tipo DIARIO | SEMANAL | MENSUAL
+     */
+    Map<String, Object> resumenVentasPorTipo(String tipo);
+
     List<Map<String, Object>> ventasDetalle(LocalDate desde, LocalDate hasta);
 
-    /** Ventas agrupadas por método de pago. */
     List<Map<String, Object>> ventasPorMetodoPago(LocalDate desde, LocalDate hasta);
 
-    /** Medicamentos más vendidos (top N por unidades). */
+    List<Map<String, Object>> ventasPorCategoria(LocalDate desde, LocalDate hasta);
+
     List<Map<String, Object>> medicamentosMasVendidos(LocalDate desde, LocalDate hasta, int limite);
 
-    /** Clientes con más compras (frecuencia + monto). */
+    List<Map<String, Object>> medicamentosMenosVendidos(LocalDate desde, LocalDate hasta, int limite);
+
     List<Map<String, Object>> clientesFrecuentes(LocalDate desde, LocalDate hasta, int limite);
 
-    /** Empleados con mayores ventas (monto). */
     List<Map<String, Object>> empleadosMayoresVentas(LocalDate desde, LocalDate hasta, int limite);
 
-    /** Stock bajo y agotado. */
+    List<Map<String, Object>> stockBajo();
+
+    List<Map<String, Object>> productosAgotados();
+
+    List<Map<String, Object>> proximosAVencer(Integer diasAnticipacion);
+
+    List<Map<String, Object>> medicamentosVencidos();
+
+    /** Compatibilidad: stock bajo + agotados juntos. */
     List<Map<String, Object>> stockBajoYAgotado();
 
-    /** Lotes próximos a vencer y ya vencidos. */
+    /** Compatibilidad: próximos + vencidos juntos. */
     List<Map<String, Object>> vencimientos(Integer diasAnticipacion);
 
-    /** Inventario valorizado (cantidad × precio venta / compra). */
     List<Map<String, Object>> inventarioValorizado();
 
-    /** Compras por proveedor en el rango. */
+    List<Map<String, Object>> movimientosInventario(LocalDate desde, LocalDate hasta);
+
     List<Map<String, Object>> comprasPorProveedor(LocalDate desde, LocalDate hasta);
 
-    /** Ganancias aproximadas del periodo (ventas − costo estimado). */
     Map<String, Object> gananciasPeriodo(LocalDate desde, LocalDate hasta);
 
-    /** Fórmulas médicas registradas en el rango. */
     List<Map<String, Object>> formulasRegistradas(LocalDate desde, LocalDate hasta);
+
+    /** Catálogo de reportes disponibles (metadatos para la UI). */
+    List<Map<String, Object>> catalogoReportes();
 }

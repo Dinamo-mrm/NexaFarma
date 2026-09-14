@@ -9,6 +9,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * API REST de reportes — FarmaSoft Plus §13.
+ * Todos los endpoints aceptan filtros de periodo opcionales (desde/hasta ISO date).
+ */
 @RestController
 @RequestMapping("/api/reportes")
 public class ReporteController {
@@ -27,10 +31,19 @@ public class ReporteController {
         return hasta != null ? hasta : LocalDate.now();
     }
 
+    @GetMapping("/catalogo")
+    public ResponseEntity<List<Map<String, Object>>> catalogo() {
+        return ResponseEntity.ok(reporteService.catalogoReportes());
+    }
+
     @GetMapping("/ventas/resumen")
     public ResponseEntity<Map<String, Object>> resumenVentas(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(required = false) String tipo) {
+        if (tipo != null && !tipo.isBlank()) {
+            return ResponseEntity.ok(reporteService.resumenVentasPorTipo(tipo));
+        }
         return ResponseEntity.ok(reporteService.resumenVentas(defDesde(desde), defHasta(hasta)));
     }
 
@@ -48,12 +61,27 @@ public class ReporteController {
         return ResponseEntity.ok(reporteService.ventasPorMetodoPago(defDesde(desde), defHasta(hasta)));
     }
 
+    @GetMapping("/ventas/por-categoria")
+    public ResponseEntity<List<Map<String, Object>>> ventasPorCategoria(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return ResponseEntity.ok(reporteService.ventasPorCategoria(defDesde(desde), defHasta(hasta)));
+    }
+
     @GetMapping("/medicamentos/mas-vendidos")
     public ResponseEntity<List<Map<String, Object>>> medicamentosMasVendidos(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
             @RequestParam(defaultValue = "10") int limite) {
         return ResponseEntity.ok(reporteService.medicamentosMasVendidos(defDesde(desde), defHasta(hasta), limite));
+    }
+
+    @GetMapping("/medicamentos/menos-vendidos")
+    public ResponseEntity<List<Map<String, Object>>> medicamentosMenosVendidos(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "10") int limite) {
+        return ResponseEntity.ok(reporteService.medicamentosMenosVendidos(defDesde(desde), defHasta(hasta), limite));
     }
 
     @GetMapping("/clientes/frecuentes")
@@ -74,7 +102,23 @@ public class ReporteController {
 
     @GetMapping("/inventario/stock-bajo")
     public ResponseEntity<List<Map<String, Object>>> stockBajo() {
-        return ResponseEntity.ok(reporteService.stockBajoYAgotado());
+        return ResponseEntity.ok(reporteService.stockBajo());
+    }
+
+    @GetMapping("/inventario/agotados")
+    public ResponseEntity<List<Map<String, Object>>> agotados() {
+        return ResponseEntity.ok(reporteService.productosAgotados());
+    }
+
+    @GetMapping("/inventario/proximos-vencer")
+    public ResponseEntity<List<Map<String, Object>>> proximosVencer(
+            @RequestParam(required = false) Integer dias) {
+        return ResponseEntity.ok(reporteService.proximosAVencer(dias));
+    }
+
+    @GetMapping("/inventario/vencidos")
+    public ResponseEntity<List<Map<String, Object>>> vencidos() {
+        return ResponseEntity.ok(reporteService.medicamentosVencidos());
     }
 
     @GetMapping("/inventario/vencimientos")
@@ -86,6 +130,13 @@ public class ReporteController {
     @GetMapping("/inventario/valorizado")
     public ResponseEntity<List<Map<String, Object>>> inventarioValorizado() {
         return ResponseEntity.ok(reporteService.inventarioValorizado());
+    }
+
+    @GetMapping("/inventario/movimientos")
+    public ResponseEntity<List<Map<String, Object>>> movimientos(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return ResponseEntity.ok(reporteService.movimientosInventario(defDesde(desde), defHasta(hasta)));
     }
 
     @GetMapping("/compras/por-proveedor")

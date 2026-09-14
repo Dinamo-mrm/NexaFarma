@@ -37,6 +37,7 @@ public interface CompraRepository extends JpaRepository<Compra, Long> {
             "WHERE c.id = :id")
     Optional<Compra> findDetalladaById(Long id);
 
+    @EntityGraph(attributePaths = {"proveedor", "empleadoResponsable"})
     List<Compra> findByFechaCompraBetween(LocalDateTime desde, LocalDateTime hasta);
 }
 
