@@ -115,7 +115,7 @@ async function cargarAlertas() {
 function renderListaStockBajo(items) {
     const cont = document.getElementById('listaStockBajo');
     if (!items.length) {
-        cont.innerHTML = '<p class="text-muted">Sin alertas de stock bajo 🎉</p>';
+        cont.innerHTML = '<p class="text-muted">Sin alertas de stock bajo </p>';
         return;
     }
     cont.innerHTML = `
@@ -136,7 +136,7 @@ function renderListaStockBajo(items) {
 function renderListaProximosVencer(items) {
     const cont = document.getElementById('listaProximosVencer');
     if (!items.length) {
-        cont.innerHTML = '<p class="text-muted">Sin lotes próximos a vencer 🎉</p>';
+        cont.innerHTML = '<p class="text-muted">Sin lotes próximos a vencer </p>';
         return;
     }
     const ordenados = [...items].sort((a, b) => (a.fechaVencimiento < b.fechaVencimiento ? -1 : 1));

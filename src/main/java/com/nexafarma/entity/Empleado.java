@@ -1,5 +1,6 @@
 package com.nexafarma.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
@@ -66,6 +67,7 @@ public class Empleado {
     private LocalDate fechaIngreso;
 
     @OneToOne(mappedBy = "empleado", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Usuario usuario;
 
     @Column(name = "creado_en")

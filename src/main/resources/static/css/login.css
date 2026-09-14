@@ -1,6 +1,6 @@
 :root {
-    --nf-blue: #034c9e;
-    --nf-blue-dark: #023671;
+    --nf-naranja: #FF6B35;
+    --nf-blue-dark: #E55A2B;
     --nf-ink: #172235;
     --nf-muted: #697586;
     --nf-surface: #ffffff;
@@ -27,7 +27,7 @@ body {
     place-items: center;
     overflow: hidden;
     color: white;
-    background: linear-gradient(145deg, #01336d 0%, var(--nf-blue) 58%, #1175c7 100%);
+    background: linear-gradient(145deg, #1a1a1a 0%, var(--nf-naranja, #FF6B35) 58%, #FF5722 100%);
     position: relative;
 }
 
@@ -100,7 +100,7 @@ body {
 
 .eyebrow {
     margin: 0 0 12px;
-    color: var(--nf-blue);
+    color: var(--nf-naranja, #FF6B35);
     font-size: .74rem;
     font-weight: 700;
     letter-spacing: .14em;
@@ -143,7 +143,7 @@ input {
 }
 
 input:focus {
-    border-color: var(--nf-blue);
+    border-color: var(--nf-naranja, #FF6B35);
     box-shadow: 0 0 0 4px rgba(3, 76, 158, .12);
 }
 
@@ -155,7 +155,7 @@ button {
     color: white;
     font: inherit;
     font-weight: 700;
-    background: var(--nf-blue);
+    background: var(--nf-naranja, #FF6B35);
     border: 0;
     border-radius: 10px;
     box-shadow: 0 8px 18px rgba(3, 76, 158, .2);
@@ -163,7 +163,7 @@ button {
 }
 
 button:hover {
-    background: var(--nf-blue-dark);
+    background: var(--nf-naranja-oscuro, #E55A2B);
     transform: translateY(-1px);
 }
 

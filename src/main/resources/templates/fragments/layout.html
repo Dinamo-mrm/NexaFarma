@@ -3,9 +3,8 @@
 <head th:fragment="head(titulo)">
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title th:text="${titulo} + ' · NexaFarma'">NexaFarma</title>
+    <title th:text="|${titulo} · NexaFarma|">NexaFarma</title>
     <link rel="icon" type="image/svg+xml" th:href="@{/img/logo.svg}"/>
-    <!-- Tipografía corporativa: Open Sans (Bold para "Nexa", Regular/Semi-bold para "Farma") -->
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
@@ -13,42 +12,75 @@
     <link rel="stylesheet" th:href="@{/css/nexafarma.css}"/>
 </head>
 <body>
-<!-- Navbar: azul cobalto #0047AB segun la identidad visual "Escudo Vital" -->
-<nav th:fragment="nav" class="navbar navbar-expand-lg navbar-dark mb-4" style="background-color:#0047AB;">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" th:href="@{/}">
+<!-- Navbar oficial: fondo carbón + acento naranja (Sistema de Color y Estilo) -->
+<nav th:fragment="nav" class="navbar navbar-expand-lg navbar-dark navbar-nexafarma mb-4">
+    <div class="container-fluid px-3 px-lg-4">
+        <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
             <img th:src="@{/img/logo.svg}" alt="NexaFarma" width="32" height="32"/>
-            <span><span class="fw-bold">Nexa</span><span class="fw-normal">Farma</span></span>
+            <span><span class="brand-nexa">Nexa</span><span class="brand-farma">Farma</span></span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
                 aria-controls="navMenu" aria-expanded="false" aria-label="Alternar navegación">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navMenu">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" th:href="@{/}">Panel de control</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/clientes}">Clientes</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/ventas/pos}">Punto de venta</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/formulas-medicas}">Fórmulas médicas</a></li>
+            <ul class="navbar-nav me-auto align-items-lg-center gap-lg-1">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}">Panel de control</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/clientes}">Clientes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/ventas/pos}">Punto de venta</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/formulas-medicas}">Fórmulas médicas</a>
+                </li>
+
+                <!-- Catálogo -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Catálogo</a>
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">Catálogo</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" th:href="@{/medicamentos}">Medicamentos</a></li>
                         <li><a class="dropdown-item" th:href="@{/categorias}">Categorías</a></li>
                         <li><a class="dropdown-item" th:href="@{/proveedores}">Proveedores</a></li>
                     </ul>
                 </li>
+
+                <!-- Operaciones -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Operaciones</a>
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">Operaciones</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" th:href="@{/inventario}">Inventario y lotes</a></li>
                         <li><a class="dropdown-item" th:href="@{/compras}">Compras</a></li>
                         <li><a class="dropdown-item" th:href="@{/devoluciones}">Devoluciones</a></li>
                         <li><a class="dropdown-item" th:href="@{/domicilios}">Domicilios</a></li>
+                        <li><hr class="dropdown-divider"/></li>
+                        <li><a class="dropdown-item" th:href="@{/ventas/historial}">Historial de ventas</a></li>
                     </ul>
                 </li>
+
+                <!-- Reportes -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Administración</a>
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">Reportes</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/reportes}">Centro de reportes</a></li>
+                        <li><hr class="dropdown-divider"/></li>
+                        <li><a class="dropdown-item" th:href="@{/reportes#ventas}">Ventas</a></li>
+                        <li><a class="dropdown-item" th:href="@{/reportes#inventario}">Inventario y vencimientos</a></li>
+                        <li><a class="dropdown-item" th:href="@{/reportes#compras}">Compras y proveedores</a></li>
+                        <li><a class="dropdown-item" th:href="@{/reportes#clientes}">Clientes y empleados</a></li>
+                    </ul>
+                </li>
+
+                <!-- Administración -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">Administración</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" th:href="@{/empleados}">Empleados</a></li>
                         <li><a class="dropdown-item" th:href="@{/usuarios}">Usuarios</a></li>

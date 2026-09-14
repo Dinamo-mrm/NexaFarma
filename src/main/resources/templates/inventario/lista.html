@@ -4,98 +4,155 @@
 <body>
 <nav th:replace="~{fragments/layout :: nav}"></nav>
 
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Inventario y lotes</h2>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalLote">+ Registrar lote</button>
+<div class="container-fluid-nf">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h1 class="page-title mb-0">Inventario y lotes</h1>
+            <p class="page-subtitle mb-0">Stock bajo, vencimientos y registro de lotes</p>
+        </div>
+        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modalLote">+ Registrar lote</button>
     </div>
 
-    <ul class="nav nav-tabs mb-3">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabStockBajo">Stock bajo / agotado</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabVencidos">Lotes vencidos</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabProximos">Próximos a vencer</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabBuscar">Buscar por medicamento</button></li>
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-stock-btn" data-bs-toggle="tab" data-bs-target="#tabStockBajo" type="button" role="tab">Stock bajo / agotado</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-vencidos-btn" data-bs-toggle="tab" data-bs-target="#tabVencidos" type="button" role="tab">Lotes vencidos</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-proximos-btn" data-bs-toggle="tab" data-bs-target="#tabProximos" type="button" role="tab">Proximos a vencer</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-buscar-btn" data-bs-toggle="tab" data-bs-target="#tabBuscar" type="button" role="tab">Buscar por medicamento</button>
+        </li>
     </ul>
 
     <div class="tab-content">
-        <div class="tab-pane fade show active" id="tabStockBajo">
-            <div class="card"><div class="card-body p-0">
-                <table class="table table-hover mb-0">
-                    <thead><tr><th>Medicamento</th><th>Disponible</th><th>Mínimo</th></tr></thead>
-                    <tbody id="tablaStockBajo"><tr><td colspan="3" class="text-center text-muted py-4">Cargando…</td></tr></tbody>
-                </table>
-            </div></div>
-        </div>
-
-        <div class="tab-pane fade" id="tabVencidos">
-            <div class="card"><div class="card-body p-0">
-                <table class="table table-hover mb-0">
-                    <thead><tr><th>Medicamento</th><th>Lote</th><th>Vencimiento</th><th>Cantidad</th></tr></thead>
-                    <tbody id="tablaVencidos"><tr><td colspan="4" class="text-center text-muted py-4">Cargando…</td></tr></tbody>
-                </table>
-            </div></div>
-        </div>
-
-        <div class="tab-pane fade" id="tabProximos">
-            <div class="card"><div class="card-body p-0">
-                <table class="table table-hover mb-0">
-                    <thead><tr><th>Medicamento</th><th>Lote</th><th>Vencimiento</th><th>Cantidad</th></tr></thead>
-                    <tbody id="tablaProximos"><tr><td colspan="4" class="text-center text-muted py-4">Cargando…</td></tr></tbody>
-                </table>
-            </div></div>
-        </div>
-
-        <div class="tab-pane fade" id="tabBuscar">
-            <div class="card mb-3"><div class="card-body">
-                <div class="input-group">
-                    <input type="number" id="medicamentoIdBuscar" class="form-control" placeholder="Id del medicamento"/>
-                    <button class="btn btn-outline-secondary" onclick="buscarPorMedicamento()">Buscar</button>
+        <div class="tab-pane fade show active" id="tabStockBajo" role="tabpanel">
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Medicamento</th>
+                                <th>Disponible</th>
+                                <th>Minimo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaStockBajo">
+                            <tr><td colspan="3" class="text-center text-muted py-4">Cargando...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div></div>
-            <div class="card"><div class="card-body p-0">
-                <table class="table table-hover mb-0">
-                    <thead><tr><th>Lote</th><th>Fabricación</th><th>Vencimiento</th><th>Cantidad</th><th>Estado</th></tr></thead>
-                    <tbody id="tablaBuscarLotes"><tr><td colspan="5" class="text-center text-muted py-4">Ingresa un id de medicamento</td></tr></tbody>
-                </table>
-            </div></div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="tabVencidos" role="tabpanel">
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Medicamento</th>
+                                <th>Lote</th>
+                                <th>Vencimiento</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaVencidos">
+                            <tr><td colspan="4" class="text-center text-muted py-4">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="tabProximos" role="tabpanel">
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Medicamento</th>
+                                <th>Lote</th>
+                                <th>Vencimiento</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaProximos">
+                            <tr><td colspan="4" class="text-center text-muted py-4">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="tabBuscar" role="tabpanel">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="number" id="medicamentoIdBuscar" class="form-control" placeholder="Id del medicamento"/>
+                        <button class="btn btn-outline-primary" type="button" onclick="buscarPorMedicamento()">Buscar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Lote</th>
+                                <th>Fabricacion</th>
+                                <th>Vencimiento</th>
+                                <th>Cantidad</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaBuscarLotes">
+                            <tr><td colspan="5" class="text-center text-muted py-4">Ingresa un id de medicamento</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Modal registrar lote -->
-<div class="modal fade" id="modalLote" tabindex="-1">
+<div class="modal fade" id="modalLote" tabindex="-1" aria-labelledby="modalLoteLabel" aria-hidden="true">
     <div class="modal-dialog">
         <form class="modal-content" id="formLote" onsubmit="return registrarLote(event)">
             <div class="modal-header">
-                <h5 class="modal-title">Registrar lote</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="modalLoteLabel">Registrar lote</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-2">
-                    <label class="form-label">Id del medicamento *</label>
-                    <input type="number" class="form-control" id="loteMedicamentoId" required/>
+                    <label class="form-label" for="loteMedicamentoId">Id del medicamento *</label>
+                    <input type="number" class="form-control" id="loteMedicamentoId" required="required"/>
                 </div>
                 <div class="mb-2">
-                    <label class="form-label">Número de lote *</label>
-                    <input type="text" class="form-control" id="numeroLote" required/>
+                    <label class="form-label" for="numeroLote">Numero de lote *</label>
+                    <input type="text" class="form-control" id="numeroLote" required="required"/>
                 </div>
                 <div class="row">
                     <div class="col-6 mb-2">
-                        <label class="form-label">Fecha de fabricación *</label>
-                        <input type="date" class="form-control" id="fechaFabricacion" required/>
+                        <label class="form-label" for="fechaFabricacion">Fecha de fabricacion *</label>
+                        <input type="date" class="form-control" id="fechaFabricacion" required="required"/>
                     </div>
                     <div class="col-6 mb-2">
-                        <label class="form-label">Fecha de vencimiento *</label>
-                        <input type="date" class="form-control" id="fechaVencimiento" required/>
+                        <label class="form-label" for="fechaVencimiento">Fecha de vencimiento *</label>
+                        <input type="date" class="form-control" id="fechaVencimiento" required="required"/>
                     </div>
                 </div>
                 <div class="mb-2">
-                    <label class="form-label">Cantidad *</label>
-                    <input type="number" class="form-control" id="cantidadLote" min="1" required/>
+                    <label class="form-label" for="cantidadLote">Cantidad *</label>
+                    <input type="number" class="form-control" id="cantidadLote" min="1" required="required"/>
                 </div>
                 <p class="text-muted small mb-0">
                     Nota: registrar un lote suelto no actualiza el inventario agregado del medicamento
-                    (eso ocurre al <a th:href="@{/compras}">recibir una compra</a>). Usa esta opción solo
+                    (eso ocurre al <a th:href="@{/compras}">recibir una compra</a>). Usa esta opcion solo
                     para ajustes manuales de lotes existentes.
                 </p>
                 <div id="errorLote" class="text-danger small mt-2"></div>

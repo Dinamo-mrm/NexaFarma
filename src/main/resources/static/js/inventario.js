@@ -14,7 +14,7 @@ async function cargarStockBajo() {
         if (!resp.ok) throw new Error();
         const items = await resp.json();
         if (!items.length) {
-            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-4">Sin alertas de stock 🎉</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-4">Sin alertas de stock </td></tr>';
             return;
         }
         tbody.innerHTML = items.map(i => `
@@ -36,7 +36,7 @@ async function cargarVencidos() {
         if (!resp.ok) throw new Error();
         const items = await resp.json();
         if (!items.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Sin lotes vencidos 🎉</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Sin lotes vencidos </td></tr>';
             return;
         }
         tbody.innerHTML = items.map(l => `
@@ -59,7 +59,7 @@ async function cargarProximos() {
         if (!resp.ok) throw new Error();
         const items = await resp.json();
         if (!items.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Sin lotes próximos a vencer 🎉</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Sin lotes próximos a vencer </td></tr>';
             return;
         }
         tbody.innerHTML = items.map(l => `

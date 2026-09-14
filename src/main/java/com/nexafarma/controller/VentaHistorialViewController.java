@@ -9,12 +9,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * la especificación (Gestión de Ventas: "Consultar el historial de ventas" /
  * "Anular una venta con autorización del administrador"). Separado de
  * {@link VentaController} (API REST) y de {@link VentaViewController} (POS).
+ *
+ * Rutas:
+ *   GET /ventas/historial  → vista principal del historial
+ *   GET /ventas            → redirección al historial (atajo)
  */
 @Controller
 @RequestMapping("/ventas")
 public class VentaHistorialViewController {
 
-    @GetMapping
+    @GetMapping({"/historial", ""})
     public String historial() {
         return "ventas/historial";
     }

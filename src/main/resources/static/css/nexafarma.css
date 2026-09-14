@@ -1,103 +1,389 @@
+/* ==========================================================================
+   NexaFarma — Sistema de Color y Estilo oficial (alineado a
+   "Sistema de Color y Estilo nexafarma.txt")
+   Acento: Naranja Vibrante · Fondo clínico · Tarjetas Bento
+   ========================================================================== */
+
 :root {
-    --nf-azul-cobalto: #0047AB;
-    --nf-azul-cobalto-oscuro: #003a8c;
-    --nf-gris-oscuro: #333333;
-    --nf-fondo-claro: #F4F6F9;
+    /* Acento crítico / CTAs */
+    --nf-naranja: #FF6B35;
+    --nf-naranja-alt: #FF5722;
+    --nf-naranja-oscuro: #E55A2B;
+    --nf-naranja-suave: rgba(255, 107, 53, 0.12);
+
+    /* Fondos */
+    --nf-fondo: #F8F9FA;
+    --nf-fondo-alt: #F4F5F7;
+    --nf-blanco: #FFFFFF;
+
+    /* Textos */
+    --nf-texto: #111111;
+    --nf-texto-secundario: #6C757D;
+    --nf-texto-inverso: #FFFFFF;
+
+    /* Estados / badges */
+    --nf-verde: #1e8e3e;
+    --nf-verde-suave: #e6f4ea;
+    --nf-azul-estado: #5B6B7C;
+    --nf-rojo: #c62828;
+    --nf-rojo-suave: #fdecea;
+    --nf-ambar: #e0a800;
+
+    /* Superficies */
+    --nf-radio: 16px;
+    --nf-radio-lg: 24px;
+    --nf-radio-pill: 999px;
+    --nf-sombra: 0 2px 8px rgba(17, 17, 17, 0.06);
+    --nf-sombra-hover: 0 4px 16px rgba(17, 17, 17, 0.10);
+
+    /* Navbar (carbón suave con acento naranja) */
+    --nf-nav-bg: #1a1a1a;
+    --nf-nav-texto: #FFFFFF;
 }
 
+/* ---------- Base ---------- */
 body {
-    background-color: var(--nf-fondo-claro);
-    color: var(--nf-gris-oscuro);
-    font-family: 'Open Sans', 'Segoe UI', sans-serif;
+    background-color: var(--nf-fondo);
+    color: var(--nf-texto);
+    font-family: 'Open Sans', 'Segoe UI', system-ui, sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6, .navbar-brand {
-    font-family: 'Open Sans', 'Segoe UI', sans-serif;
+    font-family: 'Open Sans', 'Segoe UI', system-ui, sans-serif;
+    font-weight: 700;
+    color: var(--nf-texto);
+}
+
+a {
+    color: var(--nf-naranja);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--nf-naranja-oscuro);
+}
+
+.text-muted, .kpi-etiqueta, .form-text {
+    color: var(--nf-texto-secundario) !important;
+}
+
+/* ---------- Navbar ---------- */
+.navbar-nexafarma {
+    background-color: var(--nf-nav-bg) !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.navbar-nexafarma .navbar-brand {
+    color: var(--nf-nav-texto) !important;
+}
+.navbar-nexafarma .navbar-brand .brand-nexa {
     font-weight: 700;
 }
-
-/* Consistencia de color: todo lo interactivo usa el azul cobalto corporativo,
-   no el azul por defecto de Bootstrap. */
-a {
-    color: var(--nf-azul-cobalto);
+.navbar-nexafarma .navbar-brand .brand-farma {
+    font-weight: 400;
+    color: var(--nf-naranja);
+}
+.navbar-nexafarma .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem !important;
+}
+.navbar-nexafarma .nav-link:hover,
+.navbar-nexafarma .nav-link.active,
+.navbar-nexafarma .nav-link.show {
+    color: #fff !important;
+    background-color: rgba(255, 107, 53, 0.18);
+}
+.navbar-nexafarma .dropdown-menu {
+    border: none;
+    border-radius: var(--nf-radio);
+    box-shadow: var(--nf-sombra-hover);
+    padding: 0.5rem;
+}
+.navbar-nexafarma .dropdown-item {
+    border-radius: 10px;
+    padding: 0.5rem 0.85rem;
+    color: var(--nf-texto);
+}
+.navbar-nexafarma .dropdown-item:hover,
+.navbar-nexafarma .dropdown-item:focus {
+    background-color: var(--nf-naranja-suave);
+    color: var(--nf-naranja-oscuro);
 }
 
-a:hover {
-    color: var(--nf-azul-cobalto-oscuro);
-}
-
+/* ---------- Botones ---------- */
 .btn-primary {
-    background-color: var(--nf-azul-cobalto);
-    border-color: var(--nf-azul-cobalto);
+    background-color: var(--nf-naranja);
+    border-color: var(--nf-naranja);
+    color: #fff;
+    border-radius: 12px;
+    font-weight: 600;
 }
-
 .btn-primary:hover,
 .btn-primary:focus {
-    background-color: var(--nf-azul-cobalto-oscuro);
-    border-color: var(--nf-azul-cobalto-oscuro);
+    background-color: var(--nf-naranja-oscuro);
+    border-color: var(--nf-naranja-oscuro);
+    color: #fff;
+}
+.btn-outline-primary {
+    color: var(--nf-naranja);
+    border-color: var(--nf-naranja);
+    border-radius: 12px;
+    font-weight: 600;
+}
+.btn-outline-primary:hover {
+    background-color: var(--nf-naranja);
+    border-color: var(--nf-naranja);
+    color: #fff;
+}
+.btn-dark,
+.btn-quick-action {
+    background-color: #111111;
+    border-color: #111111;
+    color: #fff;
+    border-radius: 12px;
+    font-weight: 600;
+}
+.btn-dark:hover,
+.btn-quick-action:hover {
+    background-color: #2a2a2a;
+    border-color: #2a2a2a;
+    color: #fff;
+}
+.btn-secondary {
+    border-radius: 12px;
 }
 
-.btn-outline-primary,
-.btn-outline-secondary {
-    color: var(--nf-azul-cobalto);
-    border-color: var(--nf-azul-cobalto);
+/* Píldoras / toggles (Dose Scheduler style) */
+.pill-toggle {
+    display: inline-flex;
+    gap: 0.35rem;
+    background: var(--nf-fondo-alt);
+    border-radius: var(--nf-radio-pill);
+    padding: 0.25rem;
+}
+.pill-toggle .pill-btn {
+    border: none;
+    background: transparent;
+    color: var(--nf-texto-secundario);
+    border-radius: var(--nf-radio-pill);
+    padding: 0.35rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.pill-toggle .pill-btn.active,
+.pill-toggle .pill-btn:hover {
+    background: var(--nf-naranja);
+    color: #fff;
 }
 
-.btn-outline-primary:hover,
-.btn-outline-secondary:hover {
-    background-color: var(--nf-azul-cobalto);
-    border-color: var(--nf-azul-cobalto);
+/* ---------- Formularios ---------- */
+.form-control,
+.form-select {
+    border-radius: 12px;
+    border-color: #e2e5e9;
 }
-
 .form-control:focus,
 .form-select:focus {
-    border-color: var(--nf-azul-cobalto);
-    box-shadow: 0 0 0 0.2rem rgba(0, 71, 171, 0.2);
+    border-color: var(--nf-naranja);
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.2);
 }
 
-.nav-link.active,
-.navbar-nav .nav-link:hover {
-    color: #ffffff !important;
-    text-decoration: underline;
+/* Buscador inteligente */
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: var(--nf-blanco);
+    border-radius: var(--nf-radio-pill);
+    box-shadow: var(--nf-sombra);
+    padding: 0.35rem 0.5rem 0.35rem 1rem;
+    gap: 0.5rem;
+}
+.search-bar input {
+    border: none;
+    outline: none;
+    flex: 1;
+    background: transparent;
+    font-size: 0.95rem;
+}
+.search-bar .btn-filtros {
+    border-radius: var(--nf-radio-pill);
+    white-space: nowrap;
 }
 
+/* ---------- Tarjetas (Bento) ---------- */
 .card {
     border: none;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    border-radius: var(--nf-radio);
+    background: var(--nf-blanco);
+    box-shadow: var(--nf-sombra);
+}
+.card:hover {
+    box-shadow: var(--nf-sombra-hover);
+}
+.card-body {
+    padding: 1.25rem;
 }
 
-.table thead {
-    background-color: #eef2fa;
+/* KPI / Quick Health Stats */
+.kpi-card {
+    border-left: 4px solid var(--nf-naranja);
+    border-radius: var(--nf-radio);
+}
+.kpi-card.danger {
+    border-left-color: var(--nf-rojo);
+}
+.kpi-card.warning {
+    border-left-color: var(--nf-ambar);
+}
+.kpi-card.success {
+    border-left-color: var(--nf-verde);
+}
+.kpi-valor {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: var(--nf-texto);
+    line-height: 1.2;
+}
+.kpi-etiqueta {
+    color: var(--nf-texto-secundario);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
 }
 
+/* Barra de progreso (Medication Progress) */
+.progress-nf {
+    height: 10px;
+    border-radius: var(--nf-radio-pill);
+    background: var(--nf-fondo-alt);
+}
+.progress-nf .progress-bar {
+    background-color: var(--nf-naranja);
+    border-radius: var(--nf-radio-pill);
+}
+
+/* Tarjeta oscura tipo Health Card */
+.health-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    color: #fff;
+    border-radius: var(--nf-radio-lg);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--nf-sombra);
+}
+.health-card .label {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.8rem;
+}
+.health-card .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+.health-card .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--nf-verde);
+    display: inline-block;
+}
+
+/* ---------- Tablas (Recent Activities style) ---------- */
+.table {
+    --bs-table-bg: transparent;
+}
+.table thead th {
+    background-color: transparent;
+    color: var(--nf-texto-secundario);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    border-bottom: 1px solid #eceef1;
+}
+.table tbody td {
+    border-color: #f0f1f3;
+    vertical-align: middle;
+    color: var(--nf-texto);
+}
+.table-hover tbody tr:hover {
+    background-color: var(--nf-naranja-suave);
+}
+
+/* Badges de estado */
+.badge-completado,
 .badge-vigente {
-    background-color: #1e8e3e;
+    background-color: var(--nf-verde-suave);
+    color: var(--nf-verde);
+    font-weight: 600;
+}
+.badge-pendiente {
+    background-color: var(--nf-naranja-suave);
+    color: var(--nf-naranja-oscuro);
+    font-weight: 600;
+}
+.badge-progreso {
+    background-color: #eef1f4;
+    color: var(--nf-azul-estado);
+    font-weight: 600;
+}
+.badge-vencida,
+.badge-cancelado {
+    background-color: var(--nf-rojo-suave);
+    color: var(--nf-rojo);
+    font-weight: 600;
+}
+.badge {
+    border-radius: var(--nf-radio-pill);
+    padding: 0.35em 0.75em;
 }
 
-.badge-vencida {
-    background-color: #c62828;
+/* ---------- Reportes ---------- */
+.reporte-card {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    height: 100%;
+}
+.reporte-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--nf-sombra-hover);
+}
+.reporte-card .icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--nf-naranja-suave);
+    color: var(--nf-naranja);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+.reporte-filtros {
+    background: var(--nf-blanco);
+    border-radius: var(--nf-radio);
+    box-shadow: var(--nf-sombra);
+    padding: 1rem 1.25rem;
 }
 
+/* ---------- Utilidades ---------- */
 .carrito-item {
     border-bottom: 1px solid #e5e7eb;
     padding: 0.5rem 0;
 }
-
-/* Tarjetas de KPI del panel de control */
-.kpi-card {
-    border-left: 4px solid var(--nf-azul-cobalto);
-}
-
-.kpi-valor {
-    font-size: 1.8rem;
+.page-title {
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--nf-gris-oscuro);
+    margin-bottom: 0.25rem;
 }
-
-.kpi-etiqueta {
-    color: #6c757d;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+.page-subtitle {
+    color: var(--nf-texto-secundario);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+.container-fluid-nf {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.25rem 2rem;
 }

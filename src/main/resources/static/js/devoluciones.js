@@ -73,7 +73,7 @@ async function cargarPendientes() {
         const resp = await fetch(`${API_DEVOLUCIONES}/pendientes`);
         if (!resp.ok) throw new Error();
         const items = await resp.json();
-        cont.innerHTML = items.length ? items.map(renderTarjeta).join('') : '<p class="text-muted">Sin devoluciones pendientes 🎉</p>';
+        cont.innerHTML = items.length ? items.map(renderTarjeta).join('') : '<p class="text-muted">Sin devoluciones pendientes </p>';
     } catch {
         cont.innerHTML = '<p class="text-danger">No fue posible cargar las devoluciones pendientes</p>';
     }

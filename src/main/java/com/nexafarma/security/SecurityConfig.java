@@ -37,7 +37,7 @@ public class SecurityConfig {
                         .hasAnyRole("ADMINISTRADOR", "FARMACEUTICO", "VENDEDOR", "AUXILIAR")
                         .requestMatchers("/api/alertas/**", "/api/inventario/**", "/api/lotes/**",
                                 "/api/medicamentos/**", "/api/movimientos-inventario/**",
-                                "/api/categorias/**", "/api/proveedores/**")
+                                "/api/categorias/**", "/api/proveedores/**", "/api/reportes/**")
                         .hasAnyRole("ADMINISTRADOR", "FARMACEUTICO", "VENDEDOR", "AUXILIAR")
                         .anyRequest().authenticated())
                 .formLogin(form -> form.loginPage("/login").permitAll())
