@@ -55,7 +55,10 @@ function abrirNuevo() {
 
 function abrirEdicion(cliente) {
     document.getElementById('clienteId').value = cliente.id;
+    if (document.getElementById('tipoDocumento')) document.getElementById('tipoDocumento').value = cliente.tipoDocumento ?? 'CC';
     document.getElementById('documento').value = cliente.documento ?? '';
+    if (document.getElementById('emailFacturacion')) document.getElementById('emailFacturacion').value = cliente.emailFacturacion ?? '';
+    if (document.getElementById('responsabilidadTributaria')) document.getElementById('responsabilidadTributaria').value = cliente.responsabilidadTributaria ?? '';
     document.getElementById('nombreCompleto').value = cliente.nombreCompleto ?? '';
     document.getElementById('telefono').value = cliente.telefono ?? '';
     document.getElementById('correo').value = cliente.correo ?? '';
@@ -63,6 +66,7 @@ function abrirEdicion(cliente) {
     document.getElementById('fechaNacimiento').value = cliente.fechaNacimiento ?? '';
     document.getElementById('eps').value = cliente.eps ?? '';
     document.getElementById('alergias').value = cliente.alergias ?? '';
+    document.getElementById('autorizaTratamientoDatos').checked = !!cliente.autorizaTratamientoDatos;
     document.getElementById('tituloModalCliente').textContent = 'Editar cliente';
     document.getElementById('errorCliente').textContent = '';
     modalCliente.show();
@@ -72,7 +76,10 @@ async function guardarCliente(event) {
     event.preventDefault();
     const id = document.getElementById('clienteId').value;
     const payload = {
+        tipoDocumento: document.getElementById('tipoDocumento')?.value || 'CC',
         documento: document.getElementById('documento').value,
+        emailFacturacion: document.getElementById('emailFacturacion')?.value || null,
+        responsabilidadTributaria: document.getElementById('responsabilidadTributaria')?.value || null,
         nombreCompleto: document.getElementById('nombreCompleto').value,
         telefono: document.getElementById('telefono').value || null,
         correo: document.getElementById('correo').value || null,
@@ -80,6 +87,7 @@ async function guardarCliente(event) {
         fechaNacimiento: document.getElementById('fechaNacimiento').value || null,
         eps: document.getElementById('eps').value || null,
         alergias: document.getElementById('alergias').value || null,
+        autorizaTratamientoDatos: document.getElementById('autorizaTratamientoDatos').checked,
     };
     try {
         const resp = await fetch(id ? `${API_CLIENTES}/${id}` : API_CLIENTES, {

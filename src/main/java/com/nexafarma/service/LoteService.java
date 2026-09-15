@@ -8,21 +8,33 @@ public interface LoteService {
 
     Lote crear(Lote lote);
 
+    /**
+     * Crea un lote en estado CUARENTENA (recepción de compra).
+     * No es vendible hasta liberarCuarentena.
+     */
+    Lote crearEnCuarentena(Lote lote);
+
     Lote obtenerPorId(Long id);
 
     List<Lote> listarPorMedicamento(Long medicamentoId);
 
-    /** Lotes activos de un medicamento, ordenados FEFO (primero el más próximo a vencer). */
+    /** Lotes ACTIVO ordenados FEFO (primero el más próximo a vencer). */
     List<Lote> listarActivosFefo(Long medicamentoId);
 
     List<Lote> listarVencidos();
 
-    /** dias == null usa el valor configurado por defecto (nexafarma.lotes.dias-proximos-vencer). */
     List<Lote> listarProximosAVencer(Integer dias);
 
-    /** Lanza ReglaNegocioException si el lote no existe, no está ACTIVO o está vencido. */
+    /** Lotes pendientes de validación del Regente. */
+    List<Lote> listarEnCuarentena();
+
+    /**
+     * Pasa el lote de CUARENTENA a ACTIVO tras validación física del Regente.
+     * Solo entonces entra al stock vendible (FEFO).
+     */
+    Lote liberarCuarentena(Long loteId, Long empleadoRegenteId);
+
     void validarLoteVigente(Long loteId);
 
-    /** Uso interno de MovimientoInventarioService para ajustar cantidades tras un movimiento. */
     Lote actualizarCantidadDisponible(Long loteId, int nuevaCantidad);
 }

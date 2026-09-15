@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Builder;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
@@ -71,11 +72,48 @@ public abstract class Producto {
     private BigDecimal precioVenta;
 
     @Column(name = "stock_minimo", nullable = false)
+    @Builder.Default
     private Integer stockMinimo = 10;
 
     @Column(length = 100)
     private String ubicacion;
 
+    /** Puntos de fidelización otorgados por unidad vendida. */
+    @Column(name = "puntos_por_unidad", nullable = false)
+    @Builder.Default
+    private Integer puntosPorUnidad = 0;
+
+    /**
+     * Unidades mínimas por presentación de venta (ej. 1 caja = 30 tabletas → factor 30).
+     * El inventario se maneja siempre en unidad mínima.
+     */
+    @Column(name = "factor_conversion", nullable = false)
+    @Builder.Default
+    private Integer factorConversion = 1;
+
+    /**
+     * Unidades mínimas por blíster (ej. blíster x 10 tabletas → 10).
+     * Debe ser divisor de factorConversion cuando ambos &gt; 1.
+     */
+    @Column(name = "factor_blister", nullable = false)
+    @Builder.Default
+    private Integer factorBlister = 1;
+
+    /** Nombre de la unidad mínima (TABLETA, ML, UNIDAD...). */
+    @Column(name = "unidad_minima", length = 40)
+    @Builder.Default
+    private String unidadMinima = "UNIDAD";
+
+    /**
+     * Precio máximo de venta regulado (CNPMDM). Null = sin techo regulado.
+     * El precio de venta no puede superar este valor.
+     */
+    @Column(name = "precio_maximo_regulado", precision = 12, scale = 2)
+    private java.math.BigDecimal precioMaximoRegulado;
+
     @Column(nullable = false)
+    @Builder.Default
     private boolean activo = true;
 }
+
+

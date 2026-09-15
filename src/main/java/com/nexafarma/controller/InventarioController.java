@@ -22,6 +22,11 @@ public class InventarioController {
         return ResponseEntity.ok(inventarioService.obtenerPorMedicamento(medicamentoId));
     }
 
+    @GetMapping
+    public ResponseEntity<List<Inventario>> listarTodos() {
+        return ResponseEntity.ok(inventarioService.listarTodos());
+    }
+
     @GetMapping("/stock-bajo")
     public ResponseEntity<List<Inventario>> listarStockBajo() {
         return ResponseEntity.ok(inventarioService.listarStockBajo());

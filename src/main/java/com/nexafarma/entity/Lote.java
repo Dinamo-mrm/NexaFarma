@@ -12,9 +12,8 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 /**
- * Lote de un medicamento. Un medicamento puede tener varios lotes con
- * distintas fechas de vencimiento y cantidades. Responsabilidad del
- * Desarrollador 2 (Core Farmaceutico e Inventario).
+ * Lote de un medicamento. La recepción de compra crea el lote en CUARENTENA;
+ * solo tras liberación del Regente pasa a ACTIVO y es vendible (FEFO).
  */
 @Entity
 @Table(name = "lotes", uniqueConstraints = @UniqueConstraint(columnNames = {"medicamento_id", "numero_lote"}))
@@ -50,15 +49,25 @@ public class Lote {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
-    private EstadoLote estado = EstadoLote.ACTIVO;
+    private EstadoLote estado = EstadoLote.CUARENTENA;
 
-    /** true si el lote ya fue devuelto al proveedor. */
     @Column(name = "devuelto_a_proveedor", nullable = false)
     @Builder.Default
     private boolean devueltoAProveedor = false;
 
-    /** Regla de negocio central: un lote vencido nunca puede venderse. */
+    /** Optimistic locking frente a ventas concurrentes sobre el mismo lote. */
+    @Version
+    @Column(nullable = false)
+    @Builder.Default
+    private Long version = 0L;
+
     public boolean estaVencido() {
         return fechaVencimiento != null && fechaVencimiento.isBefore(LocalDate.now());
+    }
+
+    /** Solo ACTIVO y no vencido puede venderse. */
+    public boolean esVendible() {
+        return estado == EstadoLote.ACTIVO && !estaVencido()
+                && cantidadDisponible != null && cantidadDisponible > 0;
     }
 }

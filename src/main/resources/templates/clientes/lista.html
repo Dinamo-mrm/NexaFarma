@@ -50,7 +50,17 @@
             <div class="modal-body">
                 <input type="hidden" id="clienteId"/>
                 <div class="mb-2">
-                    <label class="form-label">Documento *</label>
+                    <label class="form-label">Tipo documento (DIAN) *</label>
+                    <select class="form-select" id="tipoDocumento">
+                        <option value="CC">Cédula de ciudadanía</option>
+                        <option value="NIT">NIT</option>
+                        <option value="CE">Cédula de extranjería</option>
+                        <option value="TI">Tarjeta de identidad</option>
+                        <option value="PASAPORTE">Pasaporte</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Número documento *</label>
                     <input type="text" class="form-control" id="documento" required/>
                 </div>
                 <div class="mb-2">
@@ -65,6 +75,14 @@
                     <div class="col-6 mb-2">
                         <label class="form-label">Correo</label>
                         <input type="email" class="form-control" id="correo"/>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Email facturación DIAN</label>
+                        <input type="email" class="form-control" id="emailFacturacion"/>
+                    </div>
+                    <div class="col-12 mb-2">
+                        <label class="form-label">Responsabilidad tributaria</label>
+                        <input type="text" class="form-control" id="responsabilidadTributaria" placeholder="Ej: No responsable de IVA"/>
                     </div>
                 </div>
                 <div class="mb-2">
@@ -84,6 +102,12 @@
                 <div class="mb-2">
                     <label class="form-label">Alergias conocidas</label>
                     <textarea class="form-control" id="alergias" rows="2"></textarea>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="autorizaTratamientoDatos" required/>
+                    <label class="form-check-label" for="autorizaTratamientoDatos">
+                        Autoriza el tratamiento de datos personales (Ley 1581 de 2012 / Habeas Data) *
+                    </label>
                 </div>
                 <div id="errorCliente" class="text-danger small"></div>
             </div>

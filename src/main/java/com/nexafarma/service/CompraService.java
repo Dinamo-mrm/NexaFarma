@@ -17,9 +17,8 @@ public interface CompraService {
     Page<Compra> listarPorEstado(EstadoCompra estado, Pageable pageable);
 
     /**
-     * Marca la compra como RECIBIDA y, por cada detalle, crea el Lote
-     * correspondiente y registra la entrada en inventario
-     * (via MovimientoInventarioService.registrarEntrada).
+     * Marca la compra como RECIBIDA y, por cada detalle, crea el Lote en CUARENTENA y registra la entrada.
+     * El lote no es vendible hasta liberarCuarentena (validación del Regente).
      */
     Compra recibir(Long compraId, java.util.Map<Long, DatosLoteRecepcion> datosLotePorDetalle);
 

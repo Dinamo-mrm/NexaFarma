@@ -22,24 +22,48 @@ async function cargarProveedores() {
         const pagina = await resp.json();
         const proveedores = pagina.content ?? pagina;
         if (!proveedores.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay proveedores registrados</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No hay proveedores registrados</td></tr>';
             return;
         }
-        tbody.innerHTML = proveedores.map(p => `
-            <tr>
+        // Enriquecer con resumen de stock por proveedor
+        const filas = await Promise.all(proveedores.map(async (p) => {
+            let productos = '—';
+            let alertas = '<span class="text-muted">—</span>';
+            try {
+                const r = await fetch(`${API_PROVEEDORES}/${p.id}/resumen-stock`);
+                if (r.ok) {
+                    const s = await r.json();
+                    productos = String(s.productosActivos ?? 0);
+                    const bajo = s.conStockBajo ?? 0;
+                    const ago = s.agotados ?? 0;
+                    if (ago > 0 || bajo > 0) {
+                        alertas = `${ago ? `<span class="badge bg-danger me-1">${ago} agotado(s)</span>` : ''}
+                                   ${bajo ? `<span class="badge bg-warning text-dark">${bajo} bajo(s)</span>` : ''}`;
+                    } else {
+                        alertas = '<span class="badge bg-success">OK</span>';
+                    }
+                }
+            } catch (_) {}
+            return `<tr>
                 <td>${escapeHtml(p.nit)}</td>
-                <td>${escapeHtml(p.razonSocial)}</td>
+                <td>
+                    <div class="fw-semibold">${escapeHtml(p.razonSocial)}</div>
+                    <div class="small text-muted">${escapeHtml(p.correo ?? '')}</div>
+                </td>
                 <td>${escapeHtml(p.nombreContacto ?? '')}</td>
                 <td>${escapeHtml(p.telefono ?? '')}</td>
-                <td>${escapeHtml(p.correo ?? '')}</td>
-                <td class="text-end">
+                <td class="text-center">${productos}</td>
+                <td>${alertas}</td>
+                <td class="text-end text-nowrap">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="verAlertasProveedor(${p.id}, '${escapeHtml(p.razonSocial)}')">Ver</button>
                     <button class="btn btn-sm btn-outline-primary" onclick='abrirEdicion(${JSON.stringify(p)})'>Editar</button>
                     <button class="btn btn-sm btn-outline-danger" onclick="eliminarProveedor(${p.id})">Desactivar</button>
                 </td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }));
+        tbody.innerHTML = filas.join('');
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4">${escapeHtml(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">${escapeHtml(err.message)}</td></tr>`;
     }
 }
 

@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -32,6 +33,14 @@ public class GlobalExceptionHandler {
             FormulaMedicaInvalidaException.class, StockInsuficienteException.class})
     public ResponseEntity<ApiError> reglaNegocio(RuntimeException ex, HttpServletRequest request) {
         return responder(HttpStatus.BAD_REQUEST, ex.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler({ObjectOptimisticLockingFailureException.class,
+            jakarta.persistence.OptimisticLockException.class})
+    public ResponseEntity<ApiError> concurrencia(Exception ex, HttpServletRequest request) {
+        return responder(HttpStatus.CONFLICT,
+                "El stock de este producto acaba de ser consumido por otra caja. Actualice e intente de nuevo.",
+                request, Map.of());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

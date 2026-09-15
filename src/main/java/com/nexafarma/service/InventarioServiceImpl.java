@@ -34,6 +34,11 @@ public class InventarioServiceImpl implements InventarioService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Inventario> listarTodos() {
+        return inventarioRepository.findAllConMedicamento();
+    }
+
+    @Override
     public List<Inventario> listarStockBajo() {
         return inventarioRepository.findConStockBajo();
     }

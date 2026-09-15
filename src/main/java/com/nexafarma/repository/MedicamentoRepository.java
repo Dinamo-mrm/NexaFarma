@@ -46,4 +46,35 @@ public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> 
 
     /** Listado paginado general de medicamentos activos, sin filtro de nombre. */
     Page<Medicamento> findByActivoTrue(Pageable pageable);
+
+    @Query(value = """
+            SELECT DISTINCT m FROM Medicamento m
+            LEFT JOIN FETCH m.proveedor
+            LEFT JOIN FETCH m.categoria
+            WHERE m.activo = true
+            """,
+            countQuery = "SELECT COUNT(m) FROM Medicamento m WHERE m.activo = true")
+    Page<Medicamento> listarActivosConProveedor(Pageable pageable);
+
+
+    @Query("""
+            SELECT m FROM Medicamento m
+            LEFT JOIN FETCH m.proveedor
+            LEFT JOIN FETCH m.categoria
+            WHERE m.id = :id
+            """)
+    Optional<Medicamento> findByIdWithProveedor(@Param("id") Long id);
+
+    @Query(value = """
+            SELECT m FROM Medicamento m
+            LEFT JOIN FETCH m.proveedor
+            LEFT JOIN FETCH m.categoria
+            WHERE m.activo = true AND LOWER(m.nombreComercial) LIKE LOWER(CONCAT('%', :nombre, '%'))
+            """,
+            countQuery = """
+            SELECT COUNT(m) FROM Medicamento m
+            WHERE m.activo = true AND LOWER(m.nombreComercial) LIKE LOWER(CONCAT('%', :nombre, '%'))
+            """)
+    Page<Medicamento> buscarConProveedor(@Param("nombre") String nombre, Pageable pageable);
+
 }

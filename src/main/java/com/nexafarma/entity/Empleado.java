@@ -10,19 +10,21 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Datos laborales y personales del empleado. Las credenciales de acceso
- * viven en {@link Usuario} (relacion 1 a 1), separadas segun la
- * especificacion de FarmaSoft Plus.
- * Responsabilidad del Desarrollador 1 (Infraestructura y Seguridad).
+ * Empleado de la farmacia. Soft delete con activo=false para preservar
+ * historial de ventas y movimientos.
  */
 @Entity
 @Table(name = "empleados", uniqueConstraints = @UniqueConstraint(columnNames = "documento"))
+@SQLDelete(sql = "UPDATE empleados SET activo = false WHERE id = ?")
+@Where(clause = "activo = true")
 @Getter
 @Setter
 @NoArgsConstructor

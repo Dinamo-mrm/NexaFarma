@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/domicilios")
@@ -36,8 +38,19 @@ public class DomicilioController {
     }
 
     @PatchMapping("/{id}/asignar")
-    public ResponseEntity<Domicilio> asignarDomiciliario(@PathVariable Long id, @RequestParam Long domiciliarioId) {
-        return ResponseEntity.ok(domicilioService.asignarDomiciliario(id, domiciliarioId));
+    public ResponseEntity<Domicilio> asignarDomiciliario(
+            @PathVariable Long id,
+            @RequestParam Long domiciliarioId,
+            @RequestParam(defaultValue = "false") boolean confirmarNeveraPortatil) {
+        return ResponseEntity.ok(domicilioService.asignarDomiciliario(id, domiciliarioId, confirmarNeveraPortatil));
+    }
+
+    @PatchMapping("/{id}/pago-efectivo")
+    public ResponseEntity<Domicilio> registrarPagoEfectivo(
+            @PathVariable Long id,
+            @RequestBody Map<String, BigDecimal> body) {
+        BigDecimal monto = body != null ? body.get("montoPagaCliente") : null;
+        return ResponseEntity.ok(domicilioService.registrarPagoEfectivo(id, monto));
     }
 
     @PatchMapping("/{id}/en-camino")
@@ -46,8 +59,12 @@ public class DomicilioController {
     }
 
     @PatchMapping("/{id}/entregado")
-    public ResponseEntity<Domicilio> marcarEntregado(@PathVariable Long id) {
-        return ResponseEntity.ok(domicilioService.marcarEntregado(id));
+    public ResponseEntity<Domicilio> marcarEntregado(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body) {
+        String evidencia = body != null ? body.get("evidenciaEntregaUrl") : null;
+        String firma = body != null ? body.get("firmaDigitalUrl") : null;
+        return ResponseEntity.ok(domicilioService.marcarEntregado(id, evidencia, firma));
     }
 
     @PatchMapping("/{id}/cancelar")

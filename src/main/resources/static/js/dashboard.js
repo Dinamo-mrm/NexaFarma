@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarVentasYGrafica();
     cargarClientes();
     cargarAlertas();
+    cargarResumenDashboard();
 });
 
 function hoyISO() {
@@ -87,28 +88,42 @@ async function cargarClientes() {
 }
 
 async function cargarAlertas() {
-    // Stock bajo / agotado
     try {
         const resp = await fetch(`${API_ALERTAS}/stock-bajo`);
-        if (!resp.ok) throw new Error();
-        const items = await resp.json();
+        const items = resp.ok ? await resp.json() : [];
         document.getElementById('kpiStockBajo').textContent = items.length;
-        renderListaStockBajo(items);
-    } catch (err) {
-        document.getElementById('kpiStockBajo').textContent = '—';
-        document.getElementById('listaStockBajo').innerHTML = '<p class="text-danger">No fue posible cargar las alertas de stock.</p>';
+        const tb = document.getElementById('tablaStockBajo');
+        if (tb) {
+            tb.innerHTML = items.length ? items.slice(0, 12).map(i => {
+                const nom = i.medicamento?.nombreComercial || i.medicamento?.nombre || ('Med #' + (i.medicamentoId || i.id || ''));
+                return `<tr><td>${escapeHtml(nom)}</td>
+                    <td class="text-end">${i.cantidadDisponible ?? '—'}</td>
+                    <td class="text-end">${i.stockMinimo ?? '—'}</td></tr>`;
+            }).join('') : '<tr><td colspan="3" class="text-muted">Sin alertas de stock bajo</td></tr>';
+        }
+        // legacy div
+        const legacy = document.getElementById('listaStockBajo');
+        if (legacy) legacy.innerHTML = '';
+    } catch {
+        const el = document.getElementById('kpiStockBajo');
+        if (el) el.textContent = '—';
     }
-
-    // Próximos a vencer
     try {
-        const resp = await fetch(`${API_ALERTAS}/proximos-vencimientos`);
-        if (!resp.ok) throw new Error();
-        const items = await resp.json();
+        const resp = await fetch(`${API_ALERTAS}/proximos-vencimientos?dias=30`);
+        const items = resp.ok ? await resp.json() : [];
         document.getElementById('kpiProximosVencer').textContent = items.length;
-        renderListaProximosVencer(items);
-    } catch (err) {
-        document.getElementById('kpiProximosVencer').textContent = '—';
-        document.getElementById('listaProximosVencer').innerHTML = '<p class="text-danger">No fue posible cargar los vencimientos.</p>';
+        const tb = document.getElementById('tablaProximosVencer');
+        if (tb) {
+            tb.innerHTML = items.length ? items.slice(0, 12).map(l => {
+                const nom = l.medicamento?.nombreComercial || '';
+                return `<tr><td>${escapeHtml(nom)}</td><td><code>${escapeHtml(l.numeroLote||'')}</code></td>
+                    <td>${escapeHtml(l.fechaVencimiento||'')}</td>
+                    <td class="text-end">${l.cantidadDisponible ?? '—'}</td></tr>`;
+            }).join('') : '<tr><td colspan="4" class="text-muted">Sin próximos a vencer</td></tr>';
+        }
+    } catch {
+        const el = document.getElementById('kpiProximosVencer');
+        if (el) el.textContent = '—';
     }
 }
 
@@ -158,4 +173,66 @@ function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[c]));
+}
+
+
+async function cargarResumenDashboard() {
+    try {
+        const resp = await fetch('/api/dashboard/resumen');
+        if (!resp.ok) throw new Error();
+        const data = await resp.json();
+
+        const compras = data.comprasPendientes || [];
+        const tbC = document.getElementById('tablaComprasPendientes');
+        if (tbC) {
+            tbC.innerHTML = compras.length ? compras.slice(0, 8).map(c =>
+                `<tr><td>${escapeHtml(c.numeroCompra || ('#' + c.id))}</td>
+                 <td><span class="badge text-bg-warning">${escapeHtml(c.estado || 'PENDIENTE')}</span></td></tr>`
+            ).join('') : '<tr><td colspan="2" class="text-muted">Sin compras pendientes</td></tr>';
+        }
+
+        const doms = data.domiciliosPendientes || [];
+        const tbD = document.getElementById('tablaDomiciliosPendientes');
+        if (tbD) {
+            tbD.innerHTML = doms.length ? doms.slice(0, 8).map(d =>
+                `<tr><td class="small">${escapeHtml(d.direccionEntrega || '')}</td>
+                 <td>${d.requiereTransporteTermico ? '<span class="badge bg-info text-dark">Térmico</span>' : ''}</td></tr>`
+            ).join('') : '<tr><td colspan="2" class="text-muted">Sin domicilios pendientes</td></tr>';
+        }
+
+        const top = data.masVendidos || [];
+        const tbT = document.getElementById('tablaMasVendidos');
+        if (tbT) {
+            tbT.innerHTML = top.length ? top.map((x, i) =>
+                `<tr><td>${i + 1}</td><td>${escapeHtml(x.nombre || ('Med #' + x.medicamentoId))}</td>
+                 <td class="text-end"><strong>${x.unidades}</strong></td></tr>`
+            ).join('') : '<tr><td colspan="3" class="text-muted">Sin datos</td></tr>';
+        }
+
+        const venc = data.lotesVencidos || [];
+        const tbV = document.getElementById('tablaVencidos');
+        if (tbV) {
+            tbV.innerHTML = venc.length ? venc.slice(0, 15).map(l =>
+                `<tr><td>${escapeHtml(l.medicamento?.nombreComercial || '')}</td>
+                 <td><code>${escapeHtml(l.numeroLote || '')}</code></td>
+                 <td><span class="badge text-bg-danger">${escapeHtml(l.fechaVencimiento || '')}</span></td>
+                 <td class="text-end">${l.cantidadDisponible ?? '—'}</td></tr>`
+            ).join('') : '<tr><td colspan="4" class="text-muted">Sin lotes vencidos</td></tr>';
+        }
+
+        const rec = data.recomprasPendientes || [];
+        const tbR = document.getElementById('tablaRecompras');
+        if (tbR) {
+            tbR.innerHTML = rec.length ? rec.slice(0, 15).map(a =>
+                `<tr>
+                  <td>${escapeHtml(a.cliente?.nombreCompleto || ('#' + a.cliente?.id))}</td>
+                  <td>${escapeHtml(a.medicamento?.nombreComercial || '')}</td>
+                  <td>${escapeHtml(a.fechaSugerida || '')}</td>
+                  <td><button class="btn btn-sm btn-outline-success" onclick="marcarRecompraContactada(${a.id})">Contactado</button></td>
+                </tr>`
+            ).join('') : '<tr><td colspan="4" class="text-muted">Sin recompras pendientes</td></tr>';
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }

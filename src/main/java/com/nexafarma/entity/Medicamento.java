@@ -1,8 +1,9 @@
 package com.nexafarma.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,12 +11,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 /**
- * Especializacion de {@link Producto} para medicamentos: agrega los datos
- * sensibles propios del sector farmaceutico (registro sanitario INVIMA,
- * si requiere formula medica, refrigeracion, nombre generico, concentracion
- * y laboratorio fabricante).
- *
- * Responsabilidad del Desarrollador 2 (Core Farmaceutico e Inventario).
+ * Especialización de {@link Producto} para medicamentos.
+ * aptoFraccionamiento: solo si el empaque primario trae lote y vencimiento impresos (INVIMA).
  */
 @Entity
 @Table(name = "medicamentos")
@@ -34,7 +31,6 @@ public class Medicamento extends Producto {
     @Column(name = "laboratorio_fabricante", length = 150)
     private String laboratorioFabricante;
 
-    /** Registro sanitario expedido por INVIMA. */
     @NotBlank
     @Column(name = "registro_invima", nullable = false, length = 50)
     private String registroInvima;
@@ -58,4 +54,12 @@ public class Medicamento extends Producto {
     @Column(name = "tiene_restricciones", nullable = false)
     @Builder.Default
     private boolean tieneRestricciones = false;
+
+    /**
+     * true solo si es legal fraccionar (empaque primario con lote y fecha de vencimiento).
+     * Si es false, el POS/backend debe vender únicamente la presentación completa.
+     */
+    @Column(name = "apto_fraccionamiento", nullable = false)
+    @Builder.Default
+    private boolean aptoFraccionamiento = false;
 }

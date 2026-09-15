@@ -26,6 +26,9 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="tab-buscar-btn" data-bs-toggle="tab" data-bs-target="#tabBuscar" type="button" role="tab">Buscar por medicamento</button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-cuarentena-btn" data-bs-toggle="tab" data-bs-target="#tabCuarentena" type="button" role="tab">Cuarentena (Regente)</button>
+        </li>
     </ul>
 
     <div class="tab-content">
@@ -115,7 +118,24 @@
                     </table>
                 </div>
             </div>
+        
+        <div class="tab-pane fade" id="tabCuarentena" role="tabpanel">
+            <div class="card mb-2"><div class="card-body py-2">
+                <p class="small text-muted mb-2">Lotes recibidos pendientes de validación física del Regente. No son vendibles hasta liberar.</p>
+                <div class="input-group input-group-sm w-auto">
+                    <input type="number" id="regenteIdLiberar" class="form-control" placeholder="Id empleado Regente" min="1"/>
+                </div>
+            </div></div>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th>Medicamento</th><th>Lote</th><th>Vencimiento</th><th>Cantidad</th><th></th></tr></thead>
+                        <tbody id="tablaCuarentena"><tr><td colspan="5" class="text-center text-muted py-4">Cargando...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+</div>
     </div>
 </div>
 

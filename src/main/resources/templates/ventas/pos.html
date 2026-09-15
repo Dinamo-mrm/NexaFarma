@@ -3,131 +3,186 @@
 <head th:replace="~{fragments/layout :: head('Punto de venta')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: nav}"></nav>
-
 <div class="container-fluid-nf">
     <h1 class="page-title">Punto de venta</h1>
-    <p class="page-subtitle">Busca productos, elige cantidad y confirma la venta</p>
-
+    <p class="page-subtitle">Mostrador con o sin cliente · FEFO automático</p>
     <div class="row g-3">
-        <!-- Columna izquierda -->
         <div class="col-lg-7">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Datos de la venta</h5>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label" for="clienteDocumento">Cliente (documento) *</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="clienteDocumento" placeholder="Documento del cliente"/>
-                                <button class="btn btn-outline-primary" type="button" onclick="buscarCliente()">Buscar</button>
-                            </div>
-                            <div id="clienteEncontrado" class="form-text"></div>
+            <div class="card mb-3"><div class="card-body">
+                <h5 class="card-title mb-3">Datos de la venta</h5>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label" for="clienteDocumento">Cliente (opcional)</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="clienteDocumento" placeholder="Documento o vacío = consumidor final"/>
+                            <button class="btn btn-outline-primary" type="button" onclick="buscarCliente()">Buscar</button>
+                            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#modalClientePos">+ Nuevo</button>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="empleadoId">Empleado (id) *</label>
-                            <input type="number" class="form-control" id="empleadoId" placeholder="Id del empleado que atiende" min="1"/>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="ventaAnonima" checked onchange="toggleVentaAnonima()"/>
+                            <label class="form-check-label" for="ventaAnonima">Venta anónima / consumidor final</label>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="metodoPago">Metodo de pago *</label>
-                            <select class="form-select" id="metodoPago">
-                                <option value="EFECTIVO">Efectivo</option>
-                                <option value="TARJETA_DEBITO">Tarjeta debito</option>
-                                <option value="TARJETA_CREDITO">Tarjeta credito</option>
-                                <option value="TRANSFERENCIA">Transferencia</option>
-                                <option value="PAGO_ELECTRONICO">Pago electronico</option>
-                                <option value="PAGO_MIXTO">Pago mixto</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" for="descuento">Descuento</label>
-                            <input type="number" class="form-control" id="descuento" value="0" min="0" step="0.01"/>
-                        </div>
+                        <div id="clienteEncontrado" class="form-text">Consumidor final — sin cliente asociado</div>
                     </div>
-                    <p class="text-muted small mt-3 mb-0">
-                        Los medicamentos que requieren formula medica se validan automaticamente
-                        contra las formulas vigentes del cliente al confirmar la venta.
-                    </p>
+                    <div class="col-md-4">
+                        <label class="form-label" for="empleadoId">Empleado (id) *</label>
+                        <input type="number" class="form-control" id="empleadoId" min="1"
+                               th:value="${usuarioActual != null and usuarioActual.empleadoId != null and usuarioActual.empleadoId != 0 ? usuarioActual.empleadoId : ''}"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="metodoPago">Método de pago *</label>
+                        <select class="form-select" id="metodoPago" onchange="togglePagosMixtos()">
+                            <option value="EFECTIVO">Efectivo</option>
+                            <option value="TARJETA_DEBITO">Tarjeta débito</option>
+                            <option value="TARJETA_CREDITO">Tarjeta crédito</option>
+                            <option value="TRANSFERENCIA">Transferencia</option>
+                            <option value="PAGO_ELECTRONICO">Pago electrónico</option>
+                            <option value="PAGO_MIXTO">Pago mixto</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="descuento">Descuento ($)</label>
+                        <input type="number" class="form-control" id="descuento" min="0" step="0.01" value="0"/>
+                    </div>
                 </div>
-            </div>
+                <div id="bloquePagosMixtos" class="row g-2 mt-2 d-none">
+                    <div class="col-md-4"><label class="form-label">Efectivo</label><input type="number" class="form-control" id="pagoEfectivo" min="0" step="0.01" value="0"/></div>
+                    <div class="col-md-4"><label class="form-label">Tarjeta</label><input type="number" class="form-control" id="pagoTarjeta" min="0" step="0.01" value="0"/></div>
+                    <div class="col-md-4"><label class="form-label">Transferencia</label><input type="number" class="form-control" id="pagoTransfer" min="0" step="0.01" value="0"/></div>
+                </div>
+            </div></div>
 
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Agregar medicamento</h5>
-                    <div class="search-bar mb-3">
-                        <span class="text-muted" aria-hidden="true">🔍</span>
-                        <input type="search" id="buscarMedicamento" placeholder="Nombre comercial, generico o codigo..."
-                               autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarMedicamentos();}"/>
-                        <button type="button" class="btn btn-primary btn-sm btn-filtros" onclick="buscarMedicamentos()">Buscar</button>
-                    </div>
-                    <div id="resultadosMedicamento" class="list-group list-group-flush"></div>
+            <div class="card mb-3"><div class="card-body">
+                <h5 class="card-title">Buscar producto</h5>
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" id="buscarMedicamento" placeholder="Nombre (mín. 2 letras)" autocomplete="off"/>
+                    <button class="btn btn-primary" type="button" onclick="buscarMedicamentos()">Buscar</button>
                 </div>
-            </div>
+                <div id="resultadosBusqueda" class="list-group list-group-flush"></div>
+            </div></div>
 
-            <!-- Ficha del producto seleccionado -->
-            <div class="card mb-3 d-none" id="fichaProducto">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
-                        <div>
-                            <h5 class="mb-1" id="fichaNombre">—</h5>
-                            <div class="text-muted small" id="fichaMeta"></div>
-                        </div>
-                        <span class="badge badge-pendiente d-none" id="fichaFormula">Requiere formula</span>
+            <div class="card mb-3 d-none" id="fichaProducto"><div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="mb-1" id="fichaNombre">—</h5>
+                        <div class="text-muted small" id="fichaMeta"></div>
+                        <div class="small" id="fichaProveedor"></div>
                     </div>
-                    <div class="row g-3 mt-2 align-items-end">
-                        <div class="col-sm-4">
-                            <div class="kpi-etiqueta">Precio unitario</div>
-                            <div class="kpi-valor" style="font-size:1.35rem" id="fichaPrecio">$0</div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="kpi-etiqueta">Stock disponible</div>
-                            <div class="kpi-valor" style="font-size:1.35rem" id="fichaStock">—</div>
-                        </div>
-                        <div class="col-sm-4">
-                            <label class="form-label kpi-etiqueta" for="fichaCantidad">Cantidad a vender</label>
-                            <div class="input-group">
-                                <button type="button" class="btn btn-outline-primary" onclick="ajustarFichaCantidad(-1)">−</button>
-                                <input type="number" class="form-control text-center" id="fichaCantidad" value="1" min="1" step="1"/>
-                                <button type="button" class="btn btn-outline-primary" onclick="ajustarFichaCantidad(1)">+</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-2 mt-3 flex-wrap">
-                        <button type="button" class="btn btn-primary" onclick="agregarFichaAlCarrito()">Agregar al carrito</button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="cerrarFicha()">Cerrar</button>
-                    </div>
-                    <div id="fichaError" class="text-danger small mt-2"></div>
+                    <span class="badge text-bg-warning d-none" id="fichaFormula">Requiere fórmula</span>
                 </div>
-            </div>
+                <div class="row g-3 mt-1 align-items-end">
+                    <div class="col-6 col-md-3"><div class="text-muted small">Precio</div><div class="fs-5 fw-semibold" id="fichaPrecio">$0</div></div>
+                    <div class="col-6 col-md-3"><div class="text-muted small">Stock disponible</div><div class="fs-5 fw-semibold" id="fichaStock">—</div>
+                        <span class="badge bg-warning text-dark d-none" id="fichaBajoStock">Bajo stock</span></div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small" for="fichaModoVenta">Vender por</label>
+                        <select class="form-select form-select-sm" id="fichaModoVenta" onchange="onCambioModoVenta()">
+                            <option value="UNIDAD">Unidad</option>
+                            <option value="BLISTER">Blíster</option>
+                            <option value="CAJA">Caja</option>
+                        </select>
+                        <div class="form-text" id="fichaFactorInfo"></div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small" for="fichaCantidad">Cantidad</label>
+                        <div class="input-group input-group-sm">
+                            <button type="button" class="btn btn-outline-primary" onclick="ajustarFichaCantidad(-1)">−</button>
+                            <input type="number" class="form-control text-center" id="fichaCantidad" value="1" min="1"/>
+                            <button type="button" class="btn btn-outline-primary" onclick="ajustarFichaCantidad(1)">+</button>
+                        </div>
+                        <div class="form-text" id="fichaEquivale"></div>
+                    </div>
+                </div>
+                <div class="mt-2 small"><span class="text-muted">Lotes FEFO:</span> <span id="fichaLotes">—</span></div>
+                <div class="mt-3 d-flex gap-2">
+                    <button type="button" class="btn btn-primary" onclick="agregarFichaAlCarrito()">Agregar / actualizar carrito</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarFicha()">Cerrar</button>
+                </div>
+                <div id="fichaError" class="text-danger small mt-2"></div>
+            </div></div>
         </div>
 
-        <!-- Carrito -->
         <div class="col-lg-5">
-            <div class="card sticky-top" style="top:1rem;">
-                <div class="card-body">
-                    <h5 class="card-title">Carrito</h5>
-                    <div id="carrito"><p class="text-muted mb-0">Sin items todavia</p></div>
-                    <hr/>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-muted">Subtotal</span>
-                        <strong id="carritoSubtotal">$0</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Items</span>
-                        <strong id="carritoItems">0</strong>
-                    </div>
-                    <button type="button" class="btn btn-primary w-100" onclick="confirmarVenta()">Confirmar venta</button>
-                    <div id="mensajeVenta" class="mt-3"></div>
-                </div>
-            </div>
+            <div class="card sticky-top" style="top:1rem"><div class="card-body">
+                <h5 class="card-title">Carrito</h5>
+                <div id="carrito"><p class="text-muted mb-0">Sin ítems</p></div>
+                <hr/>
+                <div class="d-flex justify-content-between"><span>Subtotal</span><strong id="carritoSubtotal">$0</strong></div>
+                <div class="d-flex justify-content-between text-muted small"><span>Unidades</span><span id="carritoItems">0</span></div>
+                <button type="button" class="btn btn-primary w-100 mt-3" id="btnCobrar" onclick="confirmarVenta()">Confirmar venta</button>
+                <div id="resultadoVenta" class="mt-3"></div>
+            </div></div>
         </div>
     </div>
+</div>
 
-    <div class="card mt-4 d-none" id="tarjetaResultado">
-        <div class="card-body">
-            <h5 class="card-title">Venta registrada</h5>
-            <div id="resultadoVenta"></div>
-        </div>
+<div class="modal fade" id="modalPostVenta" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Venta registrada</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <p id="postVentaResumen"></p>
+      <p class="fw-semibold mb-2">¿Cómo se entrega?</p>
+      <div class="d-grid gap-2">
+        <button type="button" class="btn btn-success" onclick="marcarEntregadoMostrador()">Entregado en mostrador</button>
+        <button type="button" class="btn btn-outline-primary" onclick="mostrarFormDomicilioPost()">Programar domicilio</button>
+      </div>
+      <div id="formDomicilioPost" class="mt-3 d-none">
+        <div class="mb-2"><label class="form-label">Dirección *</label><input class="form-control" id="postDir"/></div>
+        <div class="mb-2"><label class="form-label">Teléfono *</label><input class="form-control" id="postTel"/></div>
+        <div class="mb-2"><label class="form-label">Valor domicilio</label><input type="number" class="form-control" id="postValorDom" min="0" step="0.01" value="0"/></div>
+        <button type="button" class="btn btn-primary" onclick="crearDomicilioPost()">Crear domicilio</button>
+        <div id="errorPostDom" class="text-danger small mt-1"></div>
+      </div>
+      <div class="mt-3" id="postVentaLinks"></div>
     </div>
+  </div></div>
+</div>
+
+<div class="modal fade" id="modalClientePos" tabindex="-1">
+  <div class="modal-dialog"><form class="modal-content" onsubmit="return guardarClientePos(event)">
+    <div class="modal-header"><h5 class="modal-title">Nuevo cliente</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <div class="mb-2"><label class="form-label">Tipo doc.</label>
+        <select class="form-select" id="cPosTipoDoc"><option>CC</option><option>NIT</option><option>CE</option><option>TI</option></select></div>
+      <div class="mb-2"><label class="form-label">Documento *</label><input class="form-control" id="cPosDoc" required/></div>
+      <div class="mb-2"><label class="form-label">Nombre *</label><input class="form-control" id="cPosNombre" required/></div>
+      <div class="mb-2"><label class="form-label">Teléfono</label><input class="form-control" id="cPosTel"/></div>
+      <div class="mb-2"><label class="form-label">Dirección</label><input class="form-control" id="cPosDir"/></div>
+      <div class="mb-2"><label class="form-label">Correo</label><input type="email" class="form-control" id="cPosCorreo"/></div>
+      <div class="form-check"><input class="form-check-input" type="checkbox" id="cPosHabeas" required/>
+        <label class="form-check-label" for="cPosHabeas">Autoriza datos (Ley 1581) *</label></div>
+      <div id="errorClientePos" class="text-danger small"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+  </form></div>
+</div>
+
+<div class="modal fade" id="modalFormulaPos" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg"><form class="modal-content" onsubmit="return guardarFormulaPos(event)">
+    <div class="modal-header"><h5 class="modal-title">Fórmula médica obligatoria</h5></div>
+    <div class="modal-body">
+      <p class="small text-muted" id="formulaMedNombre"></p>
+      <div class="row g-2">
+        <div class="col-md-6"><label class="form-label">Médico *</label><input class="form-control" id="fMedico" required/></div>
+        <div class="col-md-6"><label class="form-label">Tarjeta profesional *</label><input class="form-control" id="fTarjeta" required/></div>
+        <div class="col-md-6"><label class="form-label">Entidad</label><input class="form-control" id="fEntidad"/></div>
+        <div class="col-md-6"><label class="form-label">Fecha *</label><input type="date" class="form-control" id="fFecha" required/></div>
+        <div class="col-md-4"><label class="form-label">Dosis</label><input class="form-control" id="fDosis"/></div>
+        <div class="col-md-4"><label class="form-label">Frecuencia</label><input class="form-control" id="fFrecuencia"/></div>
+        <div class="col-12"><label class="form-label">Adjunto URL</label><input class="form-control" id="fAdjunto"/></div>
+      </div>
+      <div id="errorFormulaPos" class="text-danger small mt-2"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelarFormulaPos()">Cancelar</button>
+      <button type="submit" class="btn btn-primary">Continuar</button>
+    </div>
+  </form></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

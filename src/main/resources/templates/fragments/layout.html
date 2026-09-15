@@ -6,13 +6,12 @@
     <title th:text="|${titulo} · NexaFarma|">NexaFarma</title>
     <link rel="icon" type="image/svg+xml" th:href="@{/img/logo.svg}"/>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/nexafarma.css}"/>
 </head>
 <body>
-<!-- Navbar oficial: fondo carbón + acento naranja (Sistema de Color y Estilo) -->
 <nav th:fragment="nav" class="navbar navbar-expand-lg navbar-dark navbar-nexafarma mb-4">
     <div class="container-fluid px-3 px-lg-4">
         <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
@@ -20,7 +19,7 @@
             <span><span class="brand-nexa">Nexa</span><span class="brand-farma">Farma</span></span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
-                aria-controls="navMenu" aria-expanded="false" aria-label="Alternar navegación">
+                aria-controls="navMenu" aria-expanded="false" aria-label="Menu">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navMenu">
@@ -35,55 +34,90 @@
                     <a class="nav-link" th:href="@{/ventas/pos}">Punto de venta</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/formulas-medicas}">Fórmulas médicas</a>
+                    <a class="nav-link" th:href="@{/formulas-medicas}">Formulas medicas</a>
                 </li>
 
-                <!-- Catálogo -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">Catálogo</a>
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Catalogo</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" th:href="@{/medicamentos}">Medicamentos</a></li>
-                        <li><a class="dropdown-item" th:href="@{/categorias}">Categorías</a></li>
+                        <li><a class="dropdown-item" th:href="@{/categorias}">Categorias</a></li>
                         <li><a class="dropdown-item" th:href="@{/proveedores}">Proveedores</a></li>
                     </ul>
                 </li>
 
-                <!-- Operaciones -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">Operaciones</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" th:href="@{/inventario}">Inventario y lotes</a></li>
-                        <li><a class="dropdown-item" th:href="@{/compras}">Compras</a></li>
-                        <li><a class="dropdown-item" th:href="@{/devoluciones}">Devoluciones</a></li>
-                        <li><a class="dropdown-item" th:href="@{/domicilios}">Domicilios</a></li>
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Operaciones</a>
+                    <ul class="dropdown-menu" style="min-width:280px">
+                        <li>
+                            <a class="dropdown-item" th:href="@{/inventario}">
+                                <div class="fw-semibold">Inventario y lotes</div>
+                                <div class="small text-muted">Stock, FEFO, cuarentena y vencimientos</div>
+                            </a>
+                        </li>
+                        <li th:if="${usuarioActual != null and usuarioActual['rol'] == 'ADMINISTRADOR' or usuarioActual != null and usuarioActual['rol'] == 'FARMACEUTICO'}">
+                            <a class="dropdown-item" th:href="@{/compras}">
+                                <div class="fw-semibold">Compras a proveedores</div>
+                                <div class="small text-muted">Ordenes de compra y recepcion</div>
+                            </a>
+                        </li>
+                        <li th:if="${usuarioActual != null and usuarioActual['rol'] == 'ADMINISTRADOR' or usuarioActual != null and usuarioActual['rol'] == 'FARMACEUTICO'}">
+                            <a class="dropdown-item" th:href="@{/devoluciones}">
+                                <div class="fw-semibold">Devoluciones</div>
+                                <div class="small text-muted">Cliente o proveedor</div>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/domicilios}">
+                                <div class="fw-semibold">Domicilios (Kanban)</div>
+                                <div class="small text-muted">Alistamiento, ruta, PoD y cadena de frio</div>
+                            </a>
+                        </li>
                         <li><hr class="dropdown-divider"/></li>
-                        <li><a class="dropdown-item" th:href="@{/ventas/historial}">Historial de ventas</a></li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/ventas/historial}">
+                                <div class="fw-semibold">Historial de ventas</div>
+                                <div class="small text-muted">Consultar, detalle, factura y anulaciones</div>
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
-                <!-- Reportes -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">Reportes</a>
+                <li class="nav-item dropdown"
+                    th:if="${usuarioActual != null and usuarioActual['rol'] == 'ADMINISTRADOR' or usuarioActual != null and usuarioActual['rol'] == 'FARMACEUTICO'}">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Reportes</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" th:href="@{/reportes}">Centro de reportes</a></li>
-                        <li><hr class="dropdown-divider"/></li>
-                        <li><a class="dropdown-item" th:href="@{/reportes#ventas}">Ventas</a></li>
-                        <li><a class="dropdown-item" th:href="@{/reportes#inventario}">Inventario y vencimientos</a></li>
-                        <li><a class="dropdown-item" th:href="@{/reportes#compras}">Compras y proveedores</a></li>
-                        <li><a class="dropdown-item" th:href="@{/reportes#clientes}">Clientes y empleados</a></li>
                     </ul>
                 </li>
 
-                <!-- Administración -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">Administración</a>
+                <li class="nav-item dropdown"
+                    th:if="${usuarioActual != null and usuarioActual['rol'] == 'ADMINISTRADOR'}">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Administracion</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" th:href="@{/empleados}">Empleados</a></li>
                         <li><a class="dropdown-item" th:href="@{/usuarios}">Usuarios</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto align-items-lg-center"
+                th:if="${usuarioActual != null and usuarioActual['autenticado'] == true}">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <span th:text="${usuarioActual['nombre']}">Usuario</span>
+                        <span class="badge bg-secondary ms-1" th:text="${usuarioActual['rol']}">ROL</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li class="dropdown-header">
+                            <span th:text="${usuarioActual['username']}">user</span>
+                        </li>
+                        <li><hr class="dropdown-divider"/></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" class="px-3">
+                                <button type="submit" class="btn btn-sm btn-outline-danger w-100">Cerrar sesion</button>
+                            </form>
+                        </li>
                     </ul>
                 </li>
             </ul>

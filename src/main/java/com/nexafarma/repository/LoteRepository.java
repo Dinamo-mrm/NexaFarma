@@ -13,19 +13,17 @@ import java.util.List;
 @Repository
 public interface LoteRepository extends JpaRepository<Lote, Long> {
 
-    // --- Métodos ya existentes en el repositorio original: se conservan sin cambios ---
-
     List<Lote> findByMedicamentoIdAndEstado(Long medicamentoId, EstadoLote estado);
 
     List<Lote> findByMedicamentoIdAndEstadoOrderByFechaVencimientoAsc(Long medicamentoId, EstadoLote estado);
+
+    List<Lote> findByEstado(EstadoLote estado);
 
     @Query("SELECT l FROM Lote l JOIN FETCH l.medicamento m LEFT JOIN FETCH m.proveedor WHERE l.fechaVencimiento <= :fechaLimite AND l.estado = 'ACTIVO'")
     List<Lote> findProximosAVencer(@Param("fechaLimite") LocalDate fechaLimite);
 
     @Query("SELECT l FROM Lote l JOIN FETCH l.medicamento m LEFT JOIN FETCH m.proveedor WHERE l.fechaVencimiento < CURRENT_DATE AND l.estado = 'ACTIVO'")
     List<Lote> findVencidosNoActualizados();
-
-    // --- Método nuevo, necesario para evitar lotes duplicados por medicamento ---
 
     boolean existsByMedicamentoIdAndNumeroLote(Long medicamentoId, String numeroLote);
 }

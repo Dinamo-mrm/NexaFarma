@@ -26,6 +26,7 @@ public class ClienteServiceImpl implements ClienteService {
         }
         cliente.setId(null);
         cliente.setActivo(true);
+        // Habeas Data: se persiste el valor enviado (check obligatorio en UI)
         return clienteRepository.save(cliente);
     }
 
@@ -65,6 +66,9 @@ public class ClienteServiceImpl implements ClienteService {
                     "Ya existe un cliente con el documento " + datosActualizados.getDocumento());
         }
 
+        if (datosActualizados.getTipoDocumento() != null) existente.setTipoDocumento(datosActualizados.getTipoDocumento());
+        if (datosActualizados.getEmailFacturacion() != null) existente.setEmailFacturacion(datosActualizados.getEmailFacturacion());
+        if (datosActualizados.getResponsabilidadTributaria() != null) existente.setResponsabilidadTributaria(datosActualizados.getResponsabilidadTributaria());
         existente.setDocumento(datosActualizados.getDocumento());
         existente.setNombreCompleto(datosActualizados.getNombreCompleto());
         existente.setTelefono(datosActualizados.getTelefono());
@@ -73,6 +77,7 @@ public class ClienteServiceImpl implements ClienteService {
         existente.setFechaNacimiento(datosActualizados.getFechaNacimiento());
         existente.setEps(datosActualizados.getEps());
         existente.setAlergias(datosActualizados.getAlergias());
+        existente.setAutorizaTratamientoDatos(datosActualizados.isAutorizaTratamientoDatos());
 
         return clienteRepository.save(existente);
     }

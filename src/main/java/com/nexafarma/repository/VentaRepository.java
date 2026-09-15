@@ -39,7 +39,7 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
      * transaccion.
      */
     @Query("SELECT v FROM Venta v " +
-            "JOIN FETCH v.cliente " +
+            "LEFT JOIN FETCH v.cliente " +
             "JOIN FETCH v.empleado " +
             "LEFT JOIN FETCH v.detalles d " +
             "LEFT JOIN FETCH d.medicamento " +

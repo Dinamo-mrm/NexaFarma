@@ -3,14 +3,17 @@ package com.nexafarma.service;
 import com.nexafarma.entity.Empleado;
 import com.nexafarma.entity.Inventario;
 import com.nexafarma.entity.Lote;
+import com.nexafarma.entity.Medicamento;
 import com.nexafarma.entity.MovimientoInventario;
 import com.nexafarma.entity.TipoMovimientoInventario;
+import com.nexafarma.repository.MedicamentoRepository;
 import com.nexafarma.exception.ReglaNegocioException;
 import com.nexafarma.exception.ResourceNotFoundException;
 import com.nexafarma.repository.EmpleadoRepository;
 import com.nexafarma.repository.MovimientoInventarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +25,21 @@ public class MovimientoInventarioServiceImpl implements MovimientoInventarioServ
     private final EmpleadoRepository empleadoRepository;
     private final LoteService loteService;
     private final InventarioService inventarioService;
+    private final MedicamentoRepository medicamentoRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     public MovimientoInventarioServiceImpl(MovimientoInventarioRepository movimientoRepository,
                                            EmpleadoRepository empleadoRepository,
                                            LoteService loteService,
-                                           InventarioService inventarioService) {
+                                           InventarioService inventarioService,
+                                           MedicamentoRepository medicamentoRepository,
+                                           JdbcTemplate jdbcTemplate) {
         this.movimientoRepository = movimientoRepository;
         this.empleadoRepository = empleadoRepository;
         this.loteService = loteService;
         this.inventarioService = inventarioService;
+        this.medicamentoRepository = medicamentoRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -98,7 +107,7 @@ public class MovimientoInventarioServiceImpl implements MovimientoInventarioServ
                 .existenciaAnterior(existenciaAnterior)
                 .nuevaExistencia(nuevaExistencia)
                 .build();
-        return movimientoRepository.save(movimiento);
+        return persistir(movimiento);
     }
 
     private Inventario obtenerOInicializarInventario(Long medicamentoId) {
@@ -114,9 +123,86 @@ public class MovimientoInventarioServiceImpl implements MovimientoInventarioServ
                 .orElseThrow(() -> new ResourceNotFoundException("Empleado no encontrado con id " + empleadoId));
     }
 
+
+    @Override
+    public MovimientoInventario registrarAjusteSinLote(Long medicamentoId, Integer cantidad,
+                                                        TipoMovimientoInventario tipo,
+                                                        Long empleadoResponsableId, String motivo) {
+        validarCantidad(cantidad);
+        if (tipo == null) {
+            throw new ReglaNegocioException("Debe indicar el tipo de movimiento");
+        }
+        Empleado empleado = obtenerEmpleado(empleadoResponsableId);
+        Medicamento medicamento = medicamentoRepository.findById(medicamentoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Medicamento no encontrado con id " + medicamentoId));
+
+        int existenciaAnterior = 0;
+        int nuevaExistencia = 0;
+        try {
+            Inventario inv = inventarioService.obtenerPorMedicamento(medicamentoId);
+            existenciaAnterior = inv.getCantidadDisponible();
+            nuevaExistencia = existenciaAnterior;
+        } catch (ResourceNotFoundException ignored) {
+            // sin inventario aún
+        }
+
+        MovimientoInventario movimiento = MovimientoInventario.builder()
+                .medicamento(medicamento)
+                .tipoMovimiento(tipo)
+                .cantidad(cantidad)
+                .usuarioResponsable(empleado)
+                .motivo(motivo)
+                .existenciaAnterior(existenciaAnterior)
+                .nuevaExistencia(nuevaExistencia)
+                .build();
+        return persistir(movimiento);
+    }
+
     private void validarCantidad(Integer cantidad) {
         if (cantidad == null || cantidad <= 0) {
             throw new ReglaNegocioException("La cantidad del movimiento debe ser mayor a cero");
+        }
+    }
+
+    private MovimientoInventario persistir(MovimientoInventario movimiento) {
+        movimiento.setId(null);
+        resyncSecuencia();
+        return movimientoRepository.save(movimiento);
+    }
+
+    private void resyncSecuencia() {
+        try {
+            Long maxId = jdbcTemplate.queryForObject(
+                    "SELECT COALESCE(MAX(id), 0) FROM movimientos_inventario", Long.class);
+            if (maxId == null) {
+                maxId = 0L;
+            }
+            String seq = null;
+            try {
+                seq = jdbcTemplate.queryForObject(
+                        "SELECT pg_get_serial_sequence('movimientos_inventario', 'id')", String.class);
+            } catch (Exception ignored) {
+                // ignore
+            }
+            if (seq == null || seq.isBlank()) {
+                seq = "public.movimientos_inventario_id_seq";
+            }
+            if (maxId > 0) {
+                jdbcTemplate.queryForObject("SELECT setval(?::regclass, ?, true)", Long.class, seq, maxId);
+            } else {
+                jdbcTemplate.queryForObject("SELECT setval(?::regclass, 1, false)", Long.class, seq);
+            }
+        } catch (Exception e) {
+            // último recurso: setval por nombre fijo
+            try {
+                Long maxId = jdbcTemplate.queryForObject(
+                        "SELECT COALESCE(MAX(id), 0) FROM movimientos_inventario", Long.class);
+                jdbcTemplate.execute(
+                        "SELECT setval('movimientos_inventario_id_seq', "
+                        + (maxId == null || maxId < 1 ? "1, false" : (maxId + ", true")) + ")");
+            } catch (Exception ignored) {
+                // el INSERT fallará con mensaje claro si sigue mal
+            }
         }
     }
 }

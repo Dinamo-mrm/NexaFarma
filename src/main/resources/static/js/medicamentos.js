@@ -48,28 +48,52 @@ async function cargarMedicamentos() {
         const pagina = await resp.json();
         const medicamentos = pagina.content ?? pagina;
         if (!medicamentos.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No hay medicamentos registrados</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No hay medicamentos registrados</td></tr>';
             return;
         }
-        tbody.innerHTML = medicamentos.map(m => `
-            <tr>
-                <td>${escapeHtml(m.nombreComercial)}</td>
-                <td>${escapeHtml(m.categoria?.nombre ?? '—')}</td>
-                <td>${escapeHtml(m.registroInvima ?? '')}</td>
-                <td>$${Number(m.precioVenta).toLocaleString('es-CO')}</td>
+        // Cargar stock de todos los inventarios una sola vez
+        let stockMap = {};
+        try {
+            const invResp = await fetch('/api/inventario');
+            if (invResp.ok) {
+                const invs = await invResp.json();
+                (invs || []).forEach(inv => {
+                    const mid = inv.medicamento?.id || inv.medicamentoId;
+                    if (mid != null) stockMap[mid] = inv.cantidadDisponible ?? 0;
+                });
+            }
+        } catch (_) {}
+
+        tbody.innerHTML = medicamentos.map(m => {
+            const stock = stockMap[m.id];
+            const stockTxt = stock == null ? '—' : String(stock);
+            const stockClass = stock == null ? '' : (stock <= 0 ? 'text-danger fw-semibold' : (stock <= (m.stockMinimo||0) ? 'text-warning fw-semibold' : ''));
+            const prov = m.proveedor?.razonSocial || m.proveedor?.nombre || '—';
+            const cat = m.categoria?.nombre || '—';
+            return `<tr>
                 <td>
-                    ${m.requiereFormula ? '<span class="badge bg-warning text-dark">Fórmula</span>' : ''}
-                    ${m.usoControlado ? '<span class="badge bg-danger">Controlado</span>' : ''}
-                    ${m.requiereRefrigeracion ? '<span class="badge bg-info text-dark">Refrigeración</span>' : ''}
+                    <div class="fw-semibold">${escapeHtml(m.nombreComercial)}</div>
+                    <div class="small text-muted">${escapeHtml(m.nombreGenerico || '')}${m.concentracion ? ' · ' + escapeHtml(m.concentracion) : ''}</div>
                 </td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-outline-primary" onclick='abrirEdicion(${JSON.stringify(m)})'>Editar</button>
+                <td>${escapeHtml(cat)}</td>
+                <td class="small">${escapeHtml(prov)}</td>
+                <td class="text-end ${stockClass}">${stockTxt}</td>
+                <td class="text-end">$${Number(m.precioVenta).toLocaleString('es-CO')}</td>
+                <td class="small">${escapeHtml(m.registroInvima ?? '')}</td>
+                <td>
+                    ${m.requiereFormula ? '<span class="badge bg-warning text-dark">Fórmula</span> ' : ''}
+                    ${m.usoControlado ? '<span class="badge bg-danger">Controlado</span> ' : ''}
+                    ${m.requiereRefrigeracion ? '<span class="badge bg-info text-dark">Frío</span> ' : ''}
+                    ${m.aptoFraccionamiento ? '<span class="badge bg-secondary">Fraccionable</span>' : ''}
+                </td>
+                <td class="text-end text-nowrap">
+                    <button class="btn btn-sm btn-outline-primary" onclick='abrirEdicion(${JSON.stringify(m).replace(/'/g, "&#39;")})'>Editar</button>
                     <button class="btn btn-sm btn-outline-danger" onclick="eliminarMedicamento(${m.id})">Desactivar</button>
                 </td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4">${escapeHtml(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">${escapeHtml(err.message)}</td></tr>`;
     }
 }
 
@@ -102,6 +126,12 @@ function abrirEdicion(m) {
     document.getElementById('requiereFormula').checked = !!m.requiereFormula;
     document.getElementById('usoControlado').checked = !!m.usoControlado;
     document.getElementById('requiereRefrigeracion').checked = !!m.requiereRefrigeracion;
+    document.getElementById('aptoFraccionamiento').checked = !!m.aptoFraccionamiento;
+    if (document.getElementById('factorConversion')) document.getElementById('factorConversion').value = m.factorConversion ?? 1;
+    if (document.getElementById('factorBlister')) document.getElementById('factorBlister').value = m.factorBlister ?? 1;
+    if (document.getElementById('precioMaximoRegulado')) document.getElementById('precioMaximoRegulado').value = m.precioMaximoRegulado ?? '';
+    if (document.getElementById('unidadMinima')) document.getElementById('unidadMinima').value = m.unidadMinima ?? 'UNIDAD';
+    if (document.getElementById('puntosPorUnidad')) document.getElementById('puntosPorUnidad').value = m.puntosPorUnidad ?? 0;
     document.getElementById('tituloModal').textContent = 'Editar medicamento';
     document.getElementById('errorMedicamento').textContent = '';
     modalMedicamento.show();
@@ -129,6 +159,13 @@ async function guardarMedicamento(event) {
         requiereFormula: document.getElementById('requiereFormula').checked,
         usoControlado: document.getElementById('usoControlado').checked,
         requiereRefrigeracion: document.getElementById('requiereRefrigeracion').checked,
+        aptoFraccionamiento: document.getElementById('aptoFraccionamiento').checked,
+        factorConversion: parseInt(document.getElementById('factorConversion')?.value || '1', 10),
+        factorBlister: parseInt(document.getElementById('factorBlister')?.value || '1', 10),
+        precioMaximoRegulado: document.getElementById('precioMaximoRegulado')?.value
+            ? parseFloat(document.getElementById('precioMaximoRegulado').value) : null,
+        unidadMinima: document.getElementById('unidadMinima')?.value || 'UNIDAD',
+        puntosPorUnidad: parseInt(document.getElementById('puntosPorUnidad')?.value || '0', 10),
     };
     try {
         const resp = await fetch(id ? `${API_MEDICAMENTOS}/${id}` : API_MEDICAMENTOS, {

@@ -9,6 +9,8 @@ import com.nexafarma.repository.MedicamentoRepository;
 import com.nexafarma.repository.VentaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class VentaServiceImpl implements VentaService {
     private final LoteService loteService;
     private final MovimientoInventarioService movimientoInventarioService;
     private final FormulaMedicaService formulaMedicaService;
+    private final CrmService crmService;
 
     public VentaServiceImpl(VentaRepository ventaRepository,
                              ClienteRepository clienteRepository,
@@ -34,7 +37,8 @@ public class VentaServiceImpl implements VentaService {
                              MedicamentoRepository medicamentoRepository,
                              LoteService loteService,
                              MovimientoInventarioService movimientoInventarioService,
-                             FormulaMedicaService formulaMedicaService) {
+                             FormulaMedicaService formulaMedicaService,
+                              @Lazy CrmService crmService) {
         this.ventaRepository = ventaRepository;
         this.clienteRepository = clienteRepository;
         this.empleadoRepository = empleadoRepository;
@@ -42,13 +46,13 @@ public class VentaServiceImpl implements VentaService {
         this.loteService = loteService;
         this.movimientoInventarioService = movimientoInventarioService;
         this.formulaMedicaService = formulaMedicaService;
+        this.crmService = crmService;
     }
 
     @Override
     public Venta crear(Venta ventaInput) {
-        if (ventaInput.getCliente() == null || ventaInput.getCliente().getId() == null) {
-            throw new ReglaNegocioException("Debe indicar el cliente de la venta");
-        }
+        // Cliente opcional: null = venta anónima / consumidor final en mostrador.
+        // Obligatorio solo si hay medicamentos que requieren fórmula o controlados.
         if (ventaInput.getEmpleado() == null || ventaInput.getEmpleado().getId() == null) {
             throw new ReglaNegocioException("Debe indicar el empleado que atiende la venta");
         }
@@ -56,9 +60,12 @@ public class VentaServiceImpl implements VentaService {
             throw new ReglaNegocioException("La venta debe tener al menos un medicamento");
         }
 
-        Cliente cliente = clienteRepository.findById(ventaInput.getCliente().getId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Cliente no encontrado con id " + ventaInput.getCliente().getId()));
+        Cliente cliente = null;
+        if (ventaInput.getCliente() != null && ventaInput.getCliente().getId() != null) {
+            cliente = clienteRepository.findById(ventaInput.getCliente().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Cliente no encontrado con id " + ventaInput.getCliente().getId()));
+        }
         Empleado empleado = empleadoRepository.findById(ventaInput.getEmpleado().getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Empleado no encontrado con id " + ventaInput.getEmpleado().getId()));
@@ -75,6 +82,7 @@ public class VentaServiceImpl implements VentaService {
                 .build();
 
         List<DetalleVenta> detallesFinales = new ArrayList<>();
+        boolean requiereCliente = false;
         BigDecimal subtotal = BigDecimal.ZERO;
 
         for (DetalleVenta solicitud : ventaInput.getDetalles()) {
@@ -88,6 +96,20 @@ public class VentaServiceImpl implements VentaService {
             Medicamento medicamento = medicamentoRepository.findById(solicitud.getMedicamento().getId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Medicamento no encontrado con id " + solicitud.getMedicamento().getId()));
+            if ((medicamento.isRequiereFormula() || medicamento.isUsoControlado()) && cliente == null) {
+                throw new ReglaNegocioException(
+                        "Debe registrar o seleccionar un cliente para vender medicamentos con fórmula o de control especial");
+            }
+
+            // Fraccionamiento INVIMA: si no es apto, la cantidad debe ser múltiplo del factor de conversión (caja completa).
+            int factor = medicamento.getFactorConversion() != null && medicamento.getFactorConversion() > 0
+                    ? medicamento.getFactorConversion() : 1;
+            if (!medicamento.isAptoFraccionamiento() && solicitud.getCantidad() % factor != 0) {
+                throw new ReglaNegocioException(
+                        "El medicamento " + medicamento.getNombreComercial()
+                        + " no admite fraccionamiento (INVIMA). Venda en múltiplos de "
+                        + factor + " " + (medicamento.getUnidadMinima() != null ? medicamento.getUnidadMinima() : "unidades"));
+            }
 
             // Regla de negocio: medicamentos que requieren formula no se venden sin una vigente.
             if (medicamento.isRequiereFormula()) {
@@ -135,9 +157,45 @@ public class VentaServiceImpl implements VentaService {
         venta.setSubtotal(subtotal);
         BigDecimal impuestos = ventaInput.getImpuestos() != null ? ventaInput.getImpuestos() : BigDecimal.ZERO;
         venta.setImpuestos(impuestos);
-        venta.setTotal(subtotal.subtract(venta.getDescuento()).add(impuestos));
+        BigDecimal total = subtotal.subtract(venta.getDescuento()).add(impuestos);
+        if (total.compareTo(BigDecimal.ZERO) < 0) {
+            total = BigDecimal.ZERO;
+        }
+        venta.setTotal(total);
 
-        return ventaRepository.save(venta);
+        // Pagos mixtos: si vienen varios pagos, validar cobertura del total
+        if (ventaInput.getPagos() != null && !ventaInput.getPagos().isEmpty()) {
+            BigDecimal sumaPagos = BigDecimal.ZERO;
+            for (PagoVenta p : ventaInput.getPagos()) {
+                if (p.getMetodoPago() == null || p.getMonto() == null
+                        || p.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new ReglaNegocioException("Cada pago debe tener método y monto mayor a 0");
+                }
+                sumaPagos = sumaPagos.add(p.getMonto());
+            }
+            if (sumaPagos.compareTo(total) < 0) {
+                throw new ReglaNegocioException(
+                        "La suma de pagos (" + sumaPagos + ") es menor al total de la venta (" + total + ")");
+            }
+            if (ventaInput.getPagos().size() > 1) {
+                venta.setMetodoPago(MetodoPago.PAGO_MIXTO);
+            }
+            for (PagoVenta p : ventaInput.getPagos()) {
+                p.setId(null);
+                p.setVenta(venta);
+            }
+            venta.setPagos(new ArrayList<>(ventaInput.getPagos()));
+        }
+
+        Venta guardada = ventaRepository.save(venta);
+        try {
+            if (crmService != null) {
+                crmService.acumularPuntosPorVenta(guardada.getId());
+            }
+        } catch (Exception ignored) {
+            // No bloquear la venta por fallos de CRM
+        }
+        return guardada;
     }
 
     @Override

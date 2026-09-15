@@ -8,6 +8,8 @@ public interface InventarioService {
 
     Inventario obtenerPorMedicamento(Long medicamentoId);
 
+    List<Inventario> listarTodos();
+
     List<Inventario> listarStockBajo();
 
     List<Inventario> listarAgotados();

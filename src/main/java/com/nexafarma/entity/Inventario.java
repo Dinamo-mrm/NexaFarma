@@ -10,10 +10,8 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Existencia agregada y consultable de un medicamento (suma de todos sus
- * lotes activos). Se mantiene como cache actualizado por el Service layer
- * cada vez que ocurre un {@link MovimientoInventario}, para que las
- * consultas de stock no tengan que recorrer todos los lotes.
+ * Existencia agregada de un medicamento (suma de lotes ACTIVO).
+ * version: optimistic locking para evitar overselling entre cajas concurrentes.
  */
 @Entity
 @Table(name = "inventario")
@@ -42,6 +40,12 @@ public class Inventario {
 
     @Column(name = "ultima_actualizacion")
     private LocalDateTime ultimaActualizacion;
+
+    /** Optimistic locking: Hibernate incrementa en cada update. */
+    @Version
+    @Column(nullable = false)
+    @Builder.Default
+    private Long version = 0L;
 
     public boolean stockBajo() {
         return cantidadDisponible != null && stockMinimo != null && cantidadDisponible <= stockMinimo;

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 @Service
@@ -25,19 +26,22 @@ public class CompraServiceImpl implements CompraService {
     private final MedicamentoRepository medicamentoRepository;
     private final LoteService loteService;
     private final MovimientoInventarioService movimientoInventarioService;
+    private final InventarioService inventarioService;
 
     public CompraServiceImpl(CompraRepository compraRepository,
                               ProveedorRepository proveedorRepository,
                               EmpleadoRepository empleadoRepository,
                               MedicamentoRepository medicamentoRepository,
                               LoteService loteService,
-                              MovimientoInventarioService movimientoInventarioService) {
+                              MovimientoInventarioService movimientoInventarioService,
+                              InventarioService inventarioService) {
         this.compraRepository = compraRepository;
         this.proveedorRepository = proveedorRepository;
         this.empleadoRepository = empleadoRepository;
         this.medicamentoRepository = medicamentoRepository;
         this.loteService = loteService;
         this.movimientoInventarioService = movimientoInventarioService;
+        this.inventarioService = inventarioService;
     }
 
     @Override
@@ -137,7 +141,10 @@ public class CompraServiceImpl implements CompraService {
                         "Faltan los datos de lote (numero, fabricacion, vencimiento) para el detalle " + detalle.getId());
             }
 
-            Lote lote = loteService.crear(Lote.builder()
+            // Recepción técnica: el lote entra en CUARENTENA. No es vendible hasta
+            // que el Regente libere el lote (liberarCuarentena). La cantidad se registra
+            // en el lote; el inventario vendible solo suma lotes ACTIVO.
+            Lote lote = loteService.crearEnCuarentena(Lote.builder()
                     .medicamento(detalle.getMedicamento())
                     .numeroLote(datos.numeroLote())
                     .fechaFabricacion(datos.fechaFabricacion())
@@ -146,11 +153,52 @@ public class CompraServiceImpl implements CompraService {
                     .build());
 
             movimientoInventarioService.registrarEntrada(lote.getId(), detalle.getCantidad(),
-                    compra.getEmpleadoResponsable().getId(), "Recepcion compra " + compra.getNumeroCompra());
+                    compra.getEmpleadoResponsable().getId(),
+                    "Recepcion compra " + compra.getNumeroCompra() + " (CUARENTENA)");
+
+            actualizarCostoPromedioPonderado(
+                    detalle.getMedicamento().getId(),
+                    detalle.getCantidad(),
+                    detalle.getPrecioUnitario());
         }
 
         compra.setEstado(EstadoCompra.RECIBIDA);
         return compraRepository.save(compra);
+    }
+
+    /**
+     * Costo promedio ponderado: (stockPrevio * costoAnterior + qty * precioUnitario)
+     * / (stockPrevio + qty). No reemplaza a ciegas el precio de compra anterior.
+     */
+    private void actualizarCostoPromedioPonderado(Long medicamentoId, int cantidadNueva, BigDecimal precioUnitario) {
+        if (medicamentoId == null || cantidadNueva <= 0 || precioUnitario == null) {
+            return;
+        }
+        Medicamento med = medicamentoRepository.findById(medicamentoId).orElse(null);
+        if (med == null) {
+            return;
+        }
+        BigDecimal costoAnterior = med.getPrecioCompra() != null ? med.getPrecioCompra() : precioUnitario;
+
+        int stockDespues = 0;
+        try {
+            stockDespues = inventarioService.obtenerPorMedicamento(medicamentoId).getCantidadDisponible();
+        } catch (ResourceNotFoundException ignored) {
+            stockDespues = cantidadNueva;
+        }
+        int stockPrevio = Math.max(0, stockDespues - cantidadNueva);
+
+        if (stockPrevio == 0) {
+            med.setPrecioCompra(precioUnitario.setScale(2, RoundingMode.HALF_UP));
+        } else {
+            BigDecimal valorAnterior = costoAnterior.multiply(BigDecimal.valueOf(stockPrevio));
+            BigDecimal valorNuevo = precioUnitario.multiply(BigDecimal.valueOf(cantidadNueva));
+            BigDecimal cpp = valorAnterior.add(valorNuevo)
+                    .divide(BigDecimal.valueOf(stockPrevio + cantidadNueva), 4, RoundingMode.HALF_UP)
+                    .setScale(2, RoundingMode.HALF_UP);
+            med.setPrecioCompra(cpp);
+        }
+        medicamentoRepository.save(med);
     }
 
     @Override

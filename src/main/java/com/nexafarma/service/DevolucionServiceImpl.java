@@ -11,20 +11,26 @@ import com.nexafarma.repository.VentaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
-/**
- * Nota de diseno: la entidad Devolucion referencia el Medicamento pero no un
- * Lote especifico (una devolucion de cliente puede no traer informacion de
- * lote). Por eso el reingreso/descuento de stock se hace directamente sobre
- * Inventario (InventarioService.ajustarCantidad) en vez de pasar por
- * MovimientoInventarioService, que exige un loteId. Si el equipo necesita
- * trazabilidad por lote en devoluciones, se puede agregar un campo
- * `lote` opcional a la entidad Devolucion mas adelante.
- */
 @Service
 @Transactional
 public class DevolucionServiceImpl implements DevolucionService {
+
+    private static final Set<MotivoDevolucion> MOTIVOS_REINGRESO = EnumSet.of(
+            MotivoDevolucion.ERROR_DIGITACION,
+            MotivoDevolucion.ERROR_EN_LA_ENTREGA
+    );
+
+    private static final Set<MotivoDevolucion> MOTIVOS_BAJA = EnumSet.of(
+            MotivoDevolucion.PRODUCTO_DEFECTUOSO,
+            MotivoDevolucion.PRODUCTO_VENCIDO,
+            MotivoDevolucion.PRODUCTO_PROXIMO_A_VENCER,
+            MotivoDevolucion.DANO_EN_EL_EMPAQUE,
+            MotivoDevolucion.RETIRO_DEL_MERCADO
+    );
 
     private final DevolucionRepository devolucionRepository;
     private final MedicamentoRepository medicamentoRepository;
@@ -32,19 +38,22 @@ public class DevolucionServiceImpl implements DevolucionService {
     private final CompraRepository compraRepository;
     private final EmpleadoRepository empleadoRepository;
     private final InventarioService inventarioService;
+    private final MovimientoInventarioService movimientoInventarioService;
 
     public DevolucionServiceImpl(DevolucionRepository devolucionRepository,
                                   MedicamentoRepository medicamentoRepository,
                                   VentaRepository ventaRepository,
                                   CompraRepository compraRepository,
                                   EmpleadoRepository empleadoRepository,
-                                  InventarioService inventarioService) {
+                                  InventarioService inventarioService,
+                                  MovimientoInventarioService movimientoInventarioService) {
         this.devolucionRepository = devolucionRepository;
         this.medicamentoRepository = medicamentoRepository;
         this.ventaRepository = ventaRepository;
         this.compraRepository = compraRepository;
         this.empleadoRepository = empleadoRepository;
         this.inventarioService = inventarioService;
+        this.movimientoInventarioService = movimientoInventarioService;
     }
 
     @Override
@@ -118,13 +127,31 @@ public class DevolucionServiceImpl implements DevolucionService {
         }
 
         Empleado farmaceutico = empleadoRepository.findById(farmaceuticoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Empleado no encontrado con id " + farmaceuticoId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Empleado no encontrado con id " + farmaceuticoId));
 
-        // Regla de negocio: solo al validar se impacta el inventario, nunca antes.
+        Long medId = devolucion.getMedicamento().getId();
+        int cantidad = devolucion.getCantidad();
+        MotivoDevolucion motivo = devolucion.getMotivo();
+        String motivoTxt = "Devolucion #" + devolucionId + " / " + motivo;
+
         if (devolucion.getTipo() == TipoDevolucion.CLIENTE) {
-            inventarioService.ajustarCantidad(devolucion.getMedicamento().getId(), devolucion.getCantidad());
+            if (MOTIVOS_REINGRESO.contains(motivo)) {
+                inventarioService.ajustarCantidad(medId, cantidad);
+                movimientoInventarioService.registrarAjusteSinLote(
+                        medId, cantidad, TipoMovimientoInventario.ENTRADA,
+                        farmaceuticoId, motivoTxt + " — reingreso a stock");
+            } else {
+                // Averiado / caducado / daño: no reingresa a inventario vendible
+                movimientoInventarioService.registrarAjusteSinLote(
+                        medId, cantidad, TipoMovimientoInventario.SALIDA_BAJA,
+                        farmaceuticoId, motivoTxt + " — no reingresa a venta");
+            }
         } else {
-            inventarioService.ajustarCantidad(devolucion.getMedicamento().getId(), -devolucion.getCantidad());
+            inventarioService.ajustarCantidad(medId, -cantidad);
+            movimientoInventarioService.registrarAjusteSinLote(
+                    medId, cantidad, TipoMovimientoInventario.SALIDA,
+                    farmaceuticoId, motivoTxt + " — devolucion a proveedor");
         }
 
         devolucion.setValidadoPorFarmaceutico(true);

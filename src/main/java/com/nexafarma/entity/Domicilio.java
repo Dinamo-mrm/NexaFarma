@@ -2,19 +2,11 @@ package com.nexafarma.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * Pedido a domicilio asociado a una venta. Responsabilidad del
- * Desarrollador 3 (modulo avanzado, Fase 3).
- */
 @Entity
 @Table(name = "domicilios")
 @Getter
@@ -32,8 +24,9 @@ public class Domicilio {
     @JoinColumn(name = "venta_id", nullable = false)
     private Venta venta;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cliente_id", nullable = false)
+    /** Opcional: domicilio a consumidor final / sin ficha de cliente. */
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "cliente_id", nullable = true)
     private Cliente cliente;
 
     @NotBlank
@@ -60,4 +53,30 @@ public class Domicilio {
 
     @Column(name = "hora_entrega")
     private LocalDateTime horaEntrega;
+
+    /** true si la venta incluye medicamentos con requiereRefrigeracion. */
+    @Column(name = "requiere_transporte_termico", nullable = false)
+    @Builder.Default
+    private boolean requiereTransporteTermico = false;
+
+    /** Confirmación de uso de nevera portátil (obligatoria si hay cadena de frío). */
+    @Column(name = "nevera_portatil_confirmada", nullable = false)
+    @Builder.Default
+    private boolean neveraPortatilConfirmada = false;
+
+    /** Monto con el que paga el cliente (efectivo). */
+    @Column(name = "monto_paga_cliente", precision = 12, scale = 2)
+    private BigDecimal montoPagaCliente;
+
+    /** Cambio exacto que debe llevar el domiciliario. */
+    @Column(name = "cambio_en_ruta", precision = 12, scale = 2)
+    private BigDecimal cambioEnRuta;
+
+    /** PoD: foto de guía firmada o evidencia. */
+    @Column(name = "evidencia_entrega_url", length = 500)
+    private String evidenciaEntregaUrl;
+
+    /** PoD: firma digital (URL o data). */
+    @Column(name = "firma_digital_url", length = 500)
+    private String firmaDigitalUrl;
 }

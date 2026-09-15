@@ -12,14 +12,12 @@ import java.util.List;
 public record VentaRequest(
         @NotNull(message = "El cliente es obligatorio") Long clienteId,
         @NotNull(message = "El empleado que atiende la venta es obligatorio") Long empleadoId,
-        @NotNull(message = "El método de pago es obligatorio") MetodoPago metodoPago,
+        /** Método principal; si hay varios pagos se fuerza PAGO_MIXTO. */
+        MetodoPago metodoPago,
         @DecimalMin(value = "0.0", message = "El descuento no puede ser negativo") BigDecimal descuento,
-        /**
-         * Obligatorio solo si alguno de los medicamentos del carrito tiene
-         * requiereFormula = true. Se valida en el service que la fórmula
-         * esté vigente y ampare esos medicamentos.
-         */
         Long formulaMedicaId,
+        /** Pagos parciales (efectivo + tarjeta, etc.). Si se envía, debe cubrir el total. */
+        @Valid List<PagoItemRequest> pagos,
         @NotEmpty(message = "La venta debe tener al menos un item") @Valid List<VentaItemRequest> items
 ) {
 }

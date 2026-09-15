@@ -31,6 +31,22 @@ public class LoteServiceImpl implements LoteService {
 
     @Override
     public Lote crear(Lote lote) {
+        prepararNuevoLote(lote);
+        // Creación manual / ajustes: por defecto ACTIVO (compatibilidad).
+        if (lote.getEstado() == null) {
+            lote.setEstado(EstadoLote.ACTIVO);
+        }
+        return loteRepository.save(lote);
+    }
+
+    @Override
+    public Lote crearEnCuarentena(Lote lote) {
+        prepararNuevoLote(lote);
+        lote.setEstado(EstadoLote.CUARENTENA);
+        return loteRepository.save(lote);
+    }
+
+    private void prepararNuevoLote(Lote lote) {
         if (lote.getMedicamento() == null || lote.getMedicamento().getId() == null) {
             throw new ResourceNotFoundException("Debe indicar el medicamento del lote");
         }
@@ -38,18 +54,17 @@ public class LoteServiceImpl implements LoteService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Medicamento no encontrado con id " + lote.getMedicamento().getId()));
 
-        if (loteRepository.existsByMedicamentoIdAndNumeroLote(lote.getMedicamento().getId(), lote.getNumeroLote())) {
+        if (loteRepository.existsByMedicamentoIdAndNumeroLote(
+                lote.getMedicamento().getId(), lote.getNumeroLote())) {
             throw new DuplicateResourceException(
                     "Ya existe el lote " + lote.getNumeroLote() + " para este medicamento");
         }
         if (lote.getFechaVencimiento() != null && lote.getFechaFabricacion() != null
                 && !lote.getFechaVencimiento().isAfter(lote.getFechaFabricacion())) {
-            throw new ReglaNegocioException("La fecha de vencimiento debe ser posterior a la de fabricación");
+            throw new ReglaNegocioException(
+                    "La fecha de vencimiento debe ser posterior a la de fabricación");
         }
-
         lote.setId(null);
-        lote.setEstado(EstadoLote.ACTIVO);
-        return loteRepository.save(lote);
     }
 
     @Override
@@ -68,7 +83,8 @@ public class LoteServiceImpl implements LoteService {
     @Override
     @Transactional(readOnly = true)
     public List<Lote> listarActivosFefo(Long medicamentoId) {
-        return loteRepository.findByMedicamentoIdAndEstadoOrderByFechaVencimientoAsc(medicamentoId, EstadoLote.ACTIVO);
+        return loteRepository.findByMedicamentoIdAndEstadoOrderByFechaVencimientoAsc(
+                medicamentoId, EstadoLote.ACTIVO);
     }
 
     @Override
@@ -80,30 +96,55 @@ public class LoteServiceImpl implements LoteService {
     @Override
     @Transactional(readOnly = true)
     public List<Lote> listarProximosAVencer(Integer dias) {
-        int diasEfectivos = (dias != null) ? dias : diasProximosVencerPorDefecto;
-        LocalDate fechaLimite = LocalDate.now().plusDays(diasEfectivos);
-        return loteRepository.findProximosAVencer(fechaLimite);
+        int d = dias != null ? dias : diasProximosVencerPorDefecto;
+        return loteRepository.findProximosAVencer(LocalDate.now().plusDays(d));
     }
 
     @Override
     @Transactional(readOnly = true)
+    public List<Lote> listarEnCuarentena() {
+        return loteRepository.findByEstado(EstadoLote.CUARENTENA);
+    }
+
+    @Override
+    public Lote liberarCuarentena(Long loteId, Long empleadoRegenteId) {
+        if (empleadoRegenteId == null) {
+            throw new ReglaNegocioException("Debe indicar el empleado Regente que valida el lote");
+        }
+        Lote lote = obtenerPorId(loteId);
+        if (lote.getEstado() != EstadoLote.CUARENTENA) {
+            throw new ReglaNegocioException(
+                    "Solo se pueden liberar lotes en CUARENTENA (actual: " + lote.getEstado() + ")");
+        }
+        if (lote.estaVencido()) {
+            lote.setEstado(EstadoLote.VENCIDO);
+            loteRepository.save(lote);
+            throw new ReglaNegocioException(
+                    "El lote " + lote.getNumeroLote() + " ya está vencido; no puede liberarse a venta");
+        }
+        lote.setEstado(EstadoLote.ACTIVO);
+        return loteRepository.save(lote);
+    }
+
+    @Override
     public void validarLoteVigente(Long loteId) {
         Lote lote = obtenerPorId(loteId);
         if (lote.getEstado() != EstadoLote.ACTIVO) {
-            throw new ReglaNegocioException("El lote " + lote.getNumeroLote() + " no está activo");
+            throw new ReglaNegocioException(
+                    "El lote " + lote.getNumeroLote() + " no está ACTIVO (estado: " + lote.getEstado() + ")");
         }
         if (lote.estaVencido()) {
             throw new ReglaNegocioException(
-                    "El lote " + lote.getNumeroLote() + " está vencido (venció el " + lote.getFechaVencimiento() + ")");
+                    "El lote " + lote.getNumeroLote() + " está vencido y no puede usarse en venta");
         }
     }
 
     @Override
     public Lote actualizarCantidadDisponible(Long loteId, int nuevaCantidad) {
-        Lote lote = obtenerPorId(loteId);
         if (nuevaCantidad < 0) {
-            throw new ReglaNegocioException("La cantidad disponible del lote no puede ser negativa");
+            throw new ReglaNegocioException("La cantidad disponible no puede ser negativa");
         }
+        Lote lote = obtenerPorId(loteId);
         lote.setCantidadDisponible(nuevaCantidad);
         return loteRepository.save(lote);
     }

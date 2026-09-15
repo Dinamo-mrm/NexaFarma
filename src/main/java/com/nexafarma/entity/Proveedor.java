@@ -7,13 +7,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 /**
- * Proveedor de medicamentos. Modulo a cargo del Desarrollador 2
- * (Core Farmaceutico e Inventario).
+ * Proveedor de medicamentos. Soft delete con activo=false.
+ * El NIT debe incluir dígito de verificación válido (DIAN).
  */
 @Entity
 @Table(name = "proveedores", uniqueConstraints = @UniqueConstraint(columnNames = "nit"))
+@SQLDelete(sql = "UPDATE proveedores SET activo = false WHERE id = ?")
+@Where(clause = "activo = true")
 @Getter
 @Setter
 @NoArgsConstructor
