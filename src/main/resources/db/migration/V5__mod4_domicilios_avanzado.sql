@@ -1,0 +1,6 @@
+ALTER TABLE domicilios ADD COLUMN IF NOT EXISTS requiere_transporte_termico BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE domicilios ADD COLUMN IF NOT EXISTS nevera_portatil_confirmada BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE domicilios ADD COLUMN IF NOT EXISTS monto_paga_cliente NUMERIC(12,2);
+ALTER TABLE domicilios ADD COLUMN IF NOT EXISTS cambio_en_ruta NUMERIC(12,2);
+ALTER TABLE domicilios ADD COLUMN IF NOT EXISTS evidencia_entrega_url VARCHAR(500);
+ALTER TABLE domicilios ADD COLUMN IF NOT EXISTS firma_digital_url VARCHAR(500);
